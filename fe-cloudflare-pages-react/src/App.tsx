@@ -1,36 +1,23 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import ProductCard from './components/ProductCard';
+import React from 'react';
+import Header from './components/Header';
+import Banner from './components/Banner';
+import ProductGrid from './components/ProductGrid';
+import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
+import './styles/global.css';
 
-// Define the Product interface (same as in ProductCard.tsx)
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  image_url: string;
-  affiliate_url: string;
-}
-
-function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    axios.get<Product[]>(`${import.meta.env.VITE_API_URL}/products`)
-      .then((response) => setProducts(response.data))
-      .catch((error) => console.error(error));
-  }, []);
-
+const App: React.FC = () => {
   return (
-    <div>
-      <h1>Amazon Affiliate Products</h1>
-      <div>
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+    <div className="app">
+      <Header />
+      <Banner />
+      <div className="main-content">
+        <Sidebar />
+        <ProductGrid />
       </div>
+      <Footer />
     </div>
   );
-}
+};
 
 export default App;
