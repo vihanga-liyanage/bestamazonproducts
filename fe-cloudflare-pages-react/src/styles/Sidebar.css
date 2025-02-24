@@ -16,3 +16,51 @@
 .sidebar li {
   margin: 0.5rem 0;
 }
+
+.message-box {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #b3d9ff; /* Light blue border */
+  border-radius: 8px;
+  color: #004080; /* Dark blue text */
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Price Range Picker Styles */
+.price-range {
+  margin-bottom: 20px;
+}
+
+.price-range label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Customize the rc-slider */
+.rc-slider {
+  margin: 10px 0;
+}
+
+.rc-slider-track {
+  background-color: #007bff; /* Blue track */
+}
+
+.rc-slider-handle {
+  border: 2px solid #007bff; /* Blue handle */
+  background-color: #fff;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+}
+
+.rc-slider-handle:active {
+  box-shadow: 0 0 5px #007bff; /* Glow effect on active handle */
+}
+
+.rc-slider-handle:hover {
+  border-color: #0056b3; /* Darker blue on hover */
+}

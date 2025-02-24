@@ -10,4 +10,6 @@ INSERT INTO products (title, description, price, image_url, affiliate_url) VALUE
 ('Smart Bluetooth Tracker 4 pack', 'Smart Bluetooth Tracker 4 pack', 36.99, 'https://m.media-amazon.com/images/I/71+AvcYeecL._AC_SX679_.jpg', 'https://amzn.to/43bm3ex'),
 ('Advanced Eyelash Serum', 'Advanced Eyelash Serum', 24.99, 'https://m.media-amazon.com/images/I/61bpphozj7L._SX466_.jpg', 'https://amzn.to/3QsFXdd'),
 ('Fast Heating Mug warmer', 'Fast Heating Mug warmer', 25.99, 'https://m.media-amazon.com/images/I/71kXSL+GJ6L._AC_SX679_.jpg', 'https://amzn.to/3ELDOa9'),
-('Toilet Seat Covers (60 pack)', 'Toilet Seat Covers (60 pack)', 8.49, 'https://m.media-amazon.com/images/I/7190IYgXhuL._AC_SX679_.jpg', 'https://amzn.to/3QqNIAz');
+('Toilet Seat Covers (60 pack)', 'Toilet Seat Covers (60 pack)', 8.49, 'https://m.media-amazon.com/images/I/7190IYgXhuL._AC_SX679_.jpg', 'https://amzn.to/3QqNIAz'),
+('60W E26 Reptile Heat Lamp Bulbs', '60W E26 Reptile Heat Lamp Bulbs', 14.99, 'https://m.media-amazon.com/images/I/71DW1IWbiAL._AC_SX679_.jpg', 'https://amzn.to/3ES6uyg'),
+('Linzer Paint Brush 1/2 inch', 'Linzer Paint Brush 1/2 inch', 3.59, 'https://m.media-amazon.com/images/I/61tCr53sCwL._AC_SX679_.jpg', 'https://amzn.to/417ti4h');

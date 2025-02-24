@@ -10,6 +10,9 @@ const Sidebar: React.FC = () => {
         <li>Categories</li>
         <li>Top Deals</li>
       </ul>
+      <div className="message-box">
+        This site is supported by Amazon affiliate links - your support helps us keep going! 💕
+      </div>
     </aside>
   );
 };
