@@ -1,38 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ProductCard from './ProductCard';
 import '../styles/ProductGrid.css';
+import { Product } from '../App';
 
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  image_url: string;
-  affiliate_url: string;
+interface ProductGridProps {
+  products: Product[];
+  loading: boolean;
+  error: any;
 }
 
-const ProductGrid: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+const ProductGrid: React.FC<ProductGridProps> = ({ products, loading, error }) => {
 
   if (loading) {
     return <div>Loading...</div>;

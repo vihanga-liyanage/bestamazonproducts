@@ -18,7 +18,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       <h3>{product.title}</h3>
       <p>${product.price}</p>
       <a href={product.affiliate_url} target="_blank" rel="noopener noreferrer">
-        Buy Now
+        Buy On Amazon
       </a>
     </div>
   );
