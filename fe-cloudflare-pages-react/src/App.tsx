@@ -21,7 +21,7 @@ const App: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState(100);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([0, maxPrice]);
-  const [sortBy, setSortBy] = useState<string>('priceLowHigh');
+  const [sortBy, setSortBy] = useState<string>('priceHighLow');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
