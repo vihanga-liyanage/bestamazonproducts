@@ -4,7 +4,7 @@ import '../styles/Footer.css';
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
-      <p>&copy; 2023 Amazon Affiliate. All rights reserved.</p>
+      <p>&copy; 2025 Smater Picks. All rights reserved.</p>
       <div className="social-links">
         <a href="/">Facebook</a>
         <a href="/">Twitter</a>

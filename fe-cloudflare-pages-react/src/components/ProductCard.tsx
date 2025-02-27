@@ -1,13 +1,6 @@
 import React from 'react';
 import '../styles/ProductCard.css';
-
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  image_url: string;
-  affiliate_url: string;
-}
+import { Product } from '../types/Product';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   return (
