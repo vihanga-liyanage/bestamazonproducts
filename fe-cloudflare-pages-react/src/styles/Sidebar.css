@@ -133,3 +133,35 @@
 .price-inputs span {
   font-weight: bold;
 }
+
+.filter-section {
+  margin-bottom: 25px;
+}
+
+.sort-section {
+  margin-bottom: 25px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.sort-section h4 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.sort-section select {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.sort-section select:focus {
+  outline: none;
+  border-color: #007bff;
+}

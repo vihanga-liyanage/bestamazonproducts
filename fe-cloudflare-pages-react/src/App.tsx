@@ -12,15 +12,16 @@ export interface Product {
   price: number;
   image_url: string;
   affiliate_url: string;
+  customerReviews: number;
+  bestSellersRank: number;
 }
 
 const App: React.FC = () => {
-
   const [products, setProducts] = useState<Product[]>([]);
   const [maxPrice, setMaxPrice] = useState(100);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([0, maxPrice]);
-
+  const [sortBy, setSortBy] = useState<string>('priceLowHigh');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -47,7 +48,22 @@ const App: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter(
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortBy) {
+      case 'priceLowHigh':
+        return a.price - b.price;
+      case 'priceHighLow':
+        return b.price - a.price;
+      case 'customerReviews':
+        return b.customerReviews - a.customerReviews;
+      case 'bestSellers':
+        return a.bestSellersRank - b.bestSellersRank;
+      default:
+        return 0;
+    }
+  });
+
+  const filteredProducts = sortedProducts.filter(
     (product) => product.price >= priceRange[0] && product.price <= priceRange[1]
   );
 
@@ -61,6 +77,7 @@ const App: React.FC = () => {
           setTempPriceRange={setTempPriceRange} 
           applyFilters={() => setPriceRange(tempPriceRange)}
           maxPrice={maxPrice}
+          setSortBy={setSortBy}
         />
         <ProductGrid products={filteredProducts} loading={loading} error={error}/>
       </div>

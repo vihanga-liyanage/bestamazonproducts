@@ -7,9 +7,10 @@ interface SidebarProps {
   setTempPriceRange: (range: [number, number]) => void;
   applyFilters: () => void;
   maxPrice: number;
+  setSortBy: (sortOption: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ tempPriceRange, setTempPriceRange, applyFilters, maxPrice }) => {
+const Sidebar: React.FC<SidebarProps> = ({ tempPriceRange, setTempPriceRange, applyFilters, maxPrice, setSortBy }) => {
   const [sliderMax, setSliderMax] = useState(maxPrice);
 
   useEffect(() => {
@@ -18,11 +19,19 @@ const Sidebar: React.FC<SidebarProps> = ({ tempPriceRange, setTempPriceRange, ap
 
   return (
     <aside className="sidebar">
+      <h3>Sort By</h3>
+      <div className="sort-section">
+        <select onChange={(e) => setSortBy(e.target.value)}>
+          <option value="priceLowHigh">Price: Low to High</option>
+          <option value="priceHighLow">Price: High to Low</option>
+          <option value="customerReviews">Customer Reviews</option>
+          <option value="bestSellers">Best Sellers</option>
+        </select>
+      </div>
+      
       <h3>Filters</h3>
-
       <div className="filter-section">
         <h4>Price Range</h4>
-
         <div className="price-inputs">
           <span>$</span>
           <input
