@@ -1,10 +1,61 @@
 .rewards-page {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  background-color: #f8f9fa;
+  padding: 2rem;
+}
+
+.hero {
+  background-color: #ff9900;
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+}
+
+.steps {
+  margin-top: 2rem;
+}
+
+.steps h2 {
+  color: #333;
+}
+
+.step {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+.product-list {
+  margin-top: 2rem;
+}
+
+.cta {
+  margin-top: 2rem;
+  background-color: #007bff;
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.cta-button {
+  background-color: white;
+  color: #007bff;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.cta-button:hover {
+  background-color: #0056b3;
+  color: white;
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Rewards from './pages/Rewards'; // New Rewards Page
+import Rewards from './pages/Rewards';
 import './styles/global.css';
 import Home from './pages/Home';
 import Deals from './pages/Deals';
