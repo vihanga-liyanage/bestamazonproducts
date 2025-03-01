@@ -1,7 +1,25 @@
+.main-content {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevents parent scrolling */
+}
+
 .sidebar {
   width: 250px;
-  padding: 1rem;
+  height: 100vh;
+  position: sticky;
+  top: 0;
   background-color: #f4f4f4;
+  padding: 1rem;
+  overflow-y: auto; /* Sidebar scrolls if content exceeds height */
+  border-right: 1px solid #ddd;
+}
+
+.scrollable-grid {
+  flex: 1;
+  overflow-y: auto; /* Allows scrolling */
+  height: 100vh;
+  padding: 1rem;
 }
 
 .sidebar h3 {
@@ -20,9 +38,9 @@
 .message-box {
   margin-top: 20px;
   padding: 15px;
-  border: 1px solid #b3d9ff; /* Light blue border */
+  border: 1px solid #b3d9ff;
   border-radius: 8px;
-  color: #004080; /* Dark blue text */
+  color: #004080;
   font-size: 14px;
   line-height: 1.5;
   text-align: center;

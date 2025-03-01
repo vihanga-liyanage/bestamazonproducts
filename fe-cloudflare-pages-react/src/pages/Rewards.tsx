@@ -1,36 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../styles/Rewards.css';
-import ProductGrid from '../components/ProductGrid';
-import Sidebar from '../components/Sidebar';
-import useProducts from '../hooks/useProducts';
 import { SignedIn, SignedOut, SignUpButton } from '@clerk/clerk-react';
 import Banner from '../components/Banner';
-import { filterProducts, sortProducts } from '../utils/productUtils';
+import ProductGridWithSidebar from '../components/ProductGridWithSidebar';
 
 const Rewards: React.FC = () => {
-  const { products, maxPrice, loading, error } = useProducts();
-  const [sortBy, setSortBy] = useState<string>('priceHighLow');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
-  const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([0, maxPrice]);
-
-  const sortedProducts = sortProducts(products, sortBy);
-  const filteredProducts = filterProducts(sortedProducts, priceRange);
 
   return (
     <>
       <Banner title="Get Free Amazon Products!" subtitle="Order a product, leave a 5-star review, and get your money back!" />
       
       <SignedIn>
-        <div className="main-content">
-          <Sidebar 
-            tempPriceRange={tempPriceRange} 
-            setTempPriceRange={setTempPriceRange} 
-            applyFilters={() => setPriceRange(tempPriceRange)}
-            maxPrice={maxPrice}
-            setSortBy={setSortBy}
-          />
-          <ProductGrid products={filteredProducts} loading={loading} error={error} />
-        </div>
+        <ProductGridWithSidebar productType='rewards' />
       </SignedIn>
 
       <SignedOut>
