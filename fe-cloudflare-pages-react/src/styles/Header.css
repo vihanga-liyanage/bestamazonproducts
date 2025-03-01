@@ -1,16 +1,36 @@
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Center everything */
   align-items: center;
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: #333;
   color: white;
+  position: relative;
 }
 
 .logo-container {
+  position: absolute;
+  left: 1rem; /* Keep logo on the left */
   display: flex;
   align-items: center;
-  gap: 1rem; /* Space between logo and title */
+  gap: 1rem;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem; /* Adjust spacing between links */
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.auth-section {
+  position: absolute;
+  right: 1rem; 
 }
 
 .logo {
@@ -24,23 +44,24 @@
   font-weight: bold;
 }
 
-.nav a {
-  color: white;
-  margin: 0 1rem;
-  text-decoration: none;
-}
-
-.search-bar input {
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-}
-
-.search-bar button {
-  padding: 0.5rem 1rem;
+.custom-signin-button {
   background-color: #ff9900;
-  border: none;
-  border-radius: 4px;
   color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
+  transition: background 0.3s ease;
+  font-family: inherit;
+}
+
+.custom-signin-button:hover {
+  background-color: #cc7a00;
+}
+
+.large-user-button {
+  width: 40px; 
+  height: 40px;
+  border-radius: 50%;
 }

@@ -18,7 +18,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="app">
-      <Banner />
+      <Banner title="🔥 Exclusive Deals Today!" subtitle="Hurry, these offers won’t last long!" />
       <div className="main-content">
         <Sidebar 
           tempPriceRange={tempPriceRange} 

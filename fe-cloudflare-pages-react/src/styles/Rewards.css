@@ -1,61 +1,52 @@
 .rewards-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   text-align: center;
-  padding: 2rem;
-}
-
-.hero {
-  background-color: #ff9900;
-  color: white;
-  padding: 2rem;
-  border-radius: 10px;
-}
-
-.hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
+  background-color: #f8f9fa;
+  padding: 2rem 1rem;
 }
 
 .steps {
   margin-top: 2rem;
-}
-
-.steps h2 {
-  color: #333;
+  width: 90%;
+  max-width: 600px;
+  text-align: left;
 }
 
 .step {
   font-size: 1.2rem;
   margin: 1rem 0;
-}
-
-.product-list {
-  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .cta {
   margin-top: 2rem;
-  background-color: #007bff;
+  background-color: #333;
   color: white;
   padding: 2rem;
   border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
 }
 
 .cta-button {
-  background-color: white;
-  color: #007bff;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.2rem;
+  background-color: #ff6600;
+  color: white;
+  font-size: 1.4rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 1rem;
+  transition: transform 0.2s ease-in-out, background-color 0.3s;
+  font-family: inherit;
 }
 
 .cta-button:hover {
-  background-color: #0056b3;
-  color: white;
+  background-color: #cc5200;
+  transform: scale(1.05);
 }
