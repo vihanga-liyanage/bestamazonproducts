@@ -1,0 +1,92 @@
+.my-rewards-page {
+  padding: 2rem;
+  text-align: center;
+  height: 100vh;
+}
+
+.submit-reward-btn {
+  background-color: #ff9900;
+  color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-reward-btn:hover {
+  background-color: #cc7a00;
+}
+
+.requests-list {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.request-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.request-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.request-summary img {
+  width: 60px;
+  height: 60px;
+  border-radius: 5px;
+}
+
+.request-info {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.status {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+
+.status.pending-verification { color: orange; }
+.status.review-submitted { color: blue; }
+.status.pending-payment { color: green; }
+.status.payment-complete { color: darkgreen; }
+
+.request-details {
+  display: none;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.request-details.expanded {
+  display: block;
+}
+
+.request-details img {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+  margin-top: 1rem;
+}
+
+.comments {
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.comments h4 {
+  margin-bottom: 0.5rem;
+}

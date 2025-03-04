@@ -18,7 +18,8 @@
 
 .nav {
   display: flex;
-  gap: 2rem; /* Adjust spacing between links */
+  gap: 2rem;
+  padding: 0 2rem;
 }
 
 .nav a {
@@ -30,7 +31,9 @@
 
 .auth-section {
   position: absolute;
-  right: 1rem; 
+  right: 1rem;
+  display: flex;
+  align-items: center;
 }
 
 .logo {

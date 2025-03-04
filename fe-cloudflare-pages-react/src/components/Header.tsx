@@ -23,6 +23,10 @@ const Header: React.FC = () => {
           </SignInButton>
         </SignedOut>
         <SignedIn>
+          <nav className="nav">
+            <Link to="/my-rewards">My Rewards</Link>
+          </nav>
+          
           <UserButton appearance={{
               elements: {
                 avatarBox: "large-user-button",

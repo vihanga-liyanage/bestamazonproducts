@@ -7,12 +7,20 @@ import Rewards from './pages/Rewards';
 import Home from './pages/Home';
 import Deals from './pages/Deals';
 import './styles/global.css';
+import MyRewards from './pages/MyRewards';
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const App: React.FC = () => {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider 
+      publishableKey={clerkPublishableKey}
+      appearance={{
+        variables: {
+          colorPrimary: '#ff9900'
+        }
+      }}
+    >
       <Router>
         <div className="app">
           <Header />
@@ -20,6 +28,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/deals" element={<Deals />} />
+            <Route path="/my-rewards" element={<MyRewards />} />
           </Routes>
           <Footer />
         </div>
