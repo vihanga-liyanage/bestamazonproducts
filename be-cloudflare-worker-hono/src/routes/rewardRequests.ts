@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { connectDB } from "../db/db";
-import { rewardRequests } from "../db/schema";
+import { products, rewardRequests } from "../db/schema";
 import { eq, and } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
 
-type Bindings = { DB: D1Database };
+type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket };
 type Variables = { DB: ReturnType<typeof connectDB> };
 
 const rewardRequestsRoute = new Hono<{ Bindings: Bindings; Variables: Variables }>();
@@ -13,55 +14,126 @@ rewardRequestsRoute.use("*", async (c, next) => {
   await next();
 });
 
-// Fetch all reward requests for a user
+// Helper function to upload an image to Cloudflare R2 and return the public URL
+const uploadImageToR2 = async (bucket: R2Bucket, file: File | null): Promise<string | undefined> => {
+  if (!file) {
+    console.log("No file provided for upload.");
+    return undefined;
+  }
+
+  const imageId = uuidv4();
+  const fileExtension = file.name.split(".").pop();
+  const fileName = `${imageId}.${fileExtension}`;
+
+  console.log(`Uploading image: ${fileName}, Size: ${file.size} bytes`);
+
+  try {
+    const result = await bucket.put(fileName, file.stream(), { httpMetadata: { contentType: file.type } });
+    console.log(`Upload result:`, result); // ✅ Log the result to verify storage
+
+    if (!result) {
+      console.error("Upload failed: No result from put()");
+      return undefined;
+    }
+
+    console.log(`Upload successful: ${fileName}`);
+    return `https://images.smarterpicks.org/${fileName}`;
+  } catch (error) {
+    console.error("Error uploading to R2:", error);
+    return undefined;
+  }
+};
+
+
+// Fetch all reward requests for a user with product details
 rewardRequestsRoute.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const db = c.get("DB");
 
-  const results = await db.select().from(rewardRequests).where(eq(rewardRequests.userId, userId));
+  try {
+    const results = await db
+      .select({
+        rewardRequestId: rewardRequests.id,
+        userId: rewardRequests.userId,
+        status: rewardRequests.status,
+        orderScreenshot: rewardRequests.orderScreenshot,
+        reviewScreenshot: rewardRequests.reviewScreenshot,
+        reviewLink: rewardRequests.reviewLink,
+        proofOfPayment: rewardRequests.proofOfPayment,
+        comments: rewardRequests.comments,
+        createdAt: rewardRequests.createdAt,
+        updatedAt: rewardRequests.updatedAt,
+        product: {
+          id: products.id,
+          title: products.title,
+          price: products.price,
+          image_url: products.image_url,
+          affiliate_url: products.affiliate_url,
+        }
+      })
+      .from(rewardRequests)
+      .innerJoin(products, eq(rewardRequests.productId, products.id))
+      .where(eq(rewardRequests.userId, userId));
 
-  if (results.length === 0) {
-    return c.json({ error: "No reward requests found for this user" }, 404);
+    if (results.length === 0) {
+      return c.json({ error: "No reward requests found for this user" }, 404);
+    }
+
+    return c.json(results);
+  } catch (error) {
+    console.error("Database query error:", error);
+    return c.json({ error: "Failed to fetch reward requests" }, 500);
   }
-
-  return c.json(results);
 });
 
-// Create a new reward request (Check for existing requests)
+// Create a new reward request (Handles multiple image uploads)
 rewardRequestsRoute.post("/", async (c) => {
-  const { userId, productId, orderScreenshot } = await c.req.json();
+  const formData = await c.req.formData();
+  const userId = formData.get("userId") as string;
+  const productId = formData.get("productId") as string;
+  const orderScreenshot = formData.get("orderScreenshot") as File | null;
   const db = c.get("DB");
+  const bucket = c.env.R2_BUCKET;
 
   if (!userId || !productId || !orderScreenshot) {
     return c.json({ error: "Missing required fields" }, 400);
   }
 
-  // Check if a request already exists for this user and product
+  // Check if request already exists for this user and product
   const existingRequest = await db
     .select()
     .from(rewardRequests)
-    .where(and(eq(rewardRequests.userId, userId), eq(rewardRequests.productId, productId)))
+    .where(and(eq(rewardRequests.userId, userId), eq(rewardRequests.productId, Number(productId))))
     .limit(1);
 
   if (existingRequest.length > 0) {
     return c.json({ error: "A reward request already exists for this product and user" }, 409);
   }
 
-  // Insert new reward request
+  // Upload order screenshot
+  const orderScreenshotUrl = await uploadImageToR2(bucket, orderScreenshot);
+
+  // Store reward request in the database
   await db.insert(rewardRequests).values({
     userId,
-    productId,
-    orderScreenshot,
+    productId: Number(productId),
+    orderScreenshot: orderScreenshotUrl || "", // Ensure a string value
   });
 
-  return c.json({ success: true });
+  return c.json({ success: true, orderScreenshotUrl });
 });
 
-// Update an existing reward request
+// Update an existing reward request (Handles review screenshot and proof of payment uploads)
 rewardRequestsRoute.put("/:id", async (c) => {
   const id = Number(c.req.param("id"));
-  const { status, reviewScreenshot, reviewLink, proofOfPayment, comments } = await c.req.json();
+  const formData = await c.req.formData();
+  const status = formData.get("status") as string;
+  const reviewScreenshot = formData.get("reviewScreenshot") as File | null;
+  const reviewLink = formData.get("reviewLink") as string | null;
+  const proofOfPayment = formData.get("proofOfPayment") as File | null;
+  const comments = formData.get("comments") as string | null;
   const db = c.get("DB");
+  const bucket = c.env.R2_BUCKET;
 
   // Check if the reward request exists
   const existingRequest = await db.select().from(rewardRequests).where(eq(rewardRequests.id, id)).limit(1);
@@ -70,19 +142,24 @@ rewardRequestsRoute.put("/:id", async (c) => {
     return c.json({ error: "Reward request not found" }, 404);
   }
 
-  // Update the reward request
+  // Upload images if provided
+  const reviewScreenshotUrl = await uploadImageToR2(bucket, reviewScreenshot);
+  const proofOfPaymentUrl = await uploadImageToR2(bucket, proofOfPayment);
+
+  // Update the reward request in the database
   await db
     .update(rewardRequests)
     .set({
       status: status ?? existingRequest[0].status,
-      reviewScreenshot: reviewScreenshot ?? existingRequest[0].reviewScreenshot,
-      reviewLink: reviewLink ?? existingRequest[0].reviewLink,
-      proofOfPayment: proofOfPayment ?? existingRequest[0].proofOfPayment,
-      comments: comments ?? existingRequest[0].comments,
+      reviewScreenshot: reviewScreenshotUrl ?? (existingRequest[0].reviewScreenshot || ""),
+      reviewLink: reviewLink ?? (existingRequest[0].reviewLink || ""),
+      proofOfPayment: proofOfPaymentUrl ?? (existingRequest[0].proofOfPayment || ""),
+      comments: comments ?? (existingRequest[0].comments || ""),
+      updatedAt: new Date().toISOString()
     })
     .where(eq(rewardRequests.id, id));
 
-  return c.json({ success: true });
+  return c.json({ success: true, reviewScreenshotUrl, proofOfPaymentUrl });
 });
 
 export default rewardRequestsRoute;

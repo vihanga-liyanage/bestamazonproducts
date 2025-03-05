@@ -26,16 +26,12 @@ const MyRewards: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [requests, setRequests] = useState<RewardRequest[]>([]);
 
-  // Ensure the user exists in the local database before fetching reward requests
   useEffect(() => {
-    console.log(user);
-    
     if (user) {
       syncUser(user).then(fetchRewardRequests);
     }
   }, [user]);
 
-  // Fetch reward requests from the backend
   const fetchRewardRequests = async () => {
     if (!user) return;
 
@@ -52,7 +48,7 @@ const MyRewards: React.FC = () => {
     }
   };
 
-  // Submit a new reward request
+  // Create a new reward request
   const handleSubmitRequest = async (productId: number, orderScreenshot: File | null) => {
     if (!orderScreenshot || !user) return;
 
@@ -71,10 +67,36 @@ const MyRewards: React.FC = () => {
       });
 
       if (response.ok) {
-        fetchRewardRequests(); // Refresh reward requests after submitting
+        fetchRewardRequests();
+      } else {
+        console.error("Error creating reward request:", await response.text());
       }
     } catch (error) {
       console.error("Error submitting reward request:", error);
+    }
+  };
+
+  // Handle image uploads for `reviewScreenshot` and `proofOfPayment`
+  const handleImageUpload = async (rewardRequestId: string, imageFile: File, imageType: string) => {
+    if (!user || !imageFile) return;
+
+    const formData = new FormData();
+    formData.append("id", rewardRequestId);
+    formData.append(imageType, imageFile); // Dynamically append correct image type
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (response.ok) {
+        fetchRewardRequests();
+      } else {
+        console.error(`Error uploading ${imageType}:`, await response.text());
+      }
+    } catch (error) {
+      console.error(`Error submitting ${imageType}:`, error);
     }
   };
 
@@ -91,7 +113,7 @@ const MyRewards: React.FC = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             products={products}
-            onSubmit={handleSubmitRequest}
+            onSubmit={handleSubmitRequest} // ✅ Create a new reward request
           />
 
           {loading && <p>Loading reward products...</p>}
@@ -99,34 +121,53 @@ const MyRewards: React.FC = () => {
 
           <div className="requests-list">
             {requests.length > 0 ? (
-              requests
-                .filter((request) => request.userId === user.id) // Ensure only the logged-in user's requests are displayed
-                .map((request) => (
-                  <div key={request.id} className="request-card">
-                    <div className="request-summary" onClick={(e) => e.currentTarget.nextElementSibling?.classList.toggle("expanded")}>
+              requests.map((request) => (
+                <div key={request.id} className="request-card">
+                  <div className="request-summary" onClick={(e) => e.currentTarget.nextElementSibling?.classList.toggle("expanded")}>
+                    {request.product?.image_url ? (
                       <img src={request.product.image_url} alt={request.product.title} />
-                      <div className="request-info">
-                        <h3>{request.product.title}</h3>
-                        <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
-                      </div>
-                    </div>
-
-                    <div className="request-details">
-                      {request.orderScreenshot && <img src={request.orderScreenshot} alt="Order Screenshot" />}
-                      {request.reviewScreenshot && (
-                        <>
-                          <img src={request.reviewScreenshot} alt="Review Screenshot" />
-                          <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
-                        </>
-                      )}
-                      {request.proofOfPayment && <img src={request.proofOfPayment} alt="Proof of Payment" />}
-                      <div className="comments">
-                        <h4>Comments</h4>
-                        {request.comments.map((comment, index) => <p key={index}>{comment}</p>)}
-                      </div>
+                    ) : (
+                      <p>No Image Available</p>
+                    )}
+                    <div className="request-info">
+                      <h3>{request.product?.title ?? "Unknown Product"}</h3>
+                      <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
                     </div>
                   </div>
-                ))
+
+                  <div className="request-details">
+                    {request.orderScreenshot ? (
+                      <img src={request.orderScreenshot} alt="Order Screenshot" />
+                    ) : (
+                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "orderScreenshot")} />
+                    )}
+
+                    {request.reviewScreenshot ? (
+                      <>
+                        <img src={request.reviewScreenshot} alt="Review Screenshot" />
+                        <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
+                      </>
+                    ) : (
+                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "reviewScreenshot")} />
+                    )}
+
+                    {request.proofOfPayment ? (
+                      <img src={request.proofOfPayment} alt="Proof of Payment" />
+                    ) : (
+                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "proofOfPayment")} />
+                    )}
+
+                    <div className="comments">
+                      <h4>Comments</h4>
+                      {request.comments?.length > 0 ? (
+                        request.comments.map((comment, index) => <p key={index}>{comment}</p>)
+                      ) : (
+                        <p>No comments yet.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
             ) : (
               <p>No reward requests found.</p>
             )}
