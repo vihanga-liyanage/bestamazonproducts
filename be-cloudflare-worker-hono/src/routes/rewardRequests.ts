@@ -17,7 +17,6 @@ rewardRequestsRoute.use("*", async (c, next) => {
 // Helper function to upload an image to Cloudflare R2 and return the public URL
 const uploadImageToR2 = async (bucket: R2Bucket, file: File | null): Promise<string | undefined> => {
   if (!file) {
-    console.log("No file provided for upload.");
     return undefined;
   }
 
@@ -25,18 +24,14 @@ const uploadImageToR2 = async (bucket: R2Bucket, file: File | null): Promise<str
   const fileExtension = file.name.split(".").pop();
   const fileName = `${imageId}.${fileExtension}`;
 
-  console.log(`Uploading image: ${fileName}, Size: ${file.size} bytes`);
-
   try {
     const result = await bucket.put(fileName, file.stream(), { httpMetadata: { contentType: file.type } });
-    console.log(`Upload result:`, result); // ✅ Log the result to verify storage
 
     if (!result) {
       console.error("Upload failed: No result from put()");
       return undefined;
     }
 
-    console.log(`Upload successful: ${fileName}`);
     return `https://images.smarterpicks.org/${fileName}`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
