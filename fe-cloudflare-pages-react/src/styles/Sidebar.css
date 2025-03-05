@@ -183,3 +183,21 @@
   outline: none;
   border-color: #007bff;
 }
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    display: none; /* Hide sidebar on small screens */
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: white;
+    z-index: 1000;
+    padding: 2rem;
+  }
+
+  .sidebar.open {
+    display: block; /* Show when toggled */
+  }
+}

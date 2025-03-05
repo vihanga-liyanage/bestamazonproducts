@@ -1,5 +1,4 @@
 .deals-page {
-  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -7,4 +6,11 @@
   justify-content: center;
   text-align: center;
   background-color: #f8f9fa;
+}
+
+@media screen and (max-width: 768px) {
+  .rewards-page, .deals-page {
+    padding: 1rem;
+    text-align: center;
+  }
 }

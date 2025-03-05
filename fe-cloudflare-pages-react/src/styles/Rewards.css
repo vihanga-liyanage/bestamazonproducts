@@ -50,3 +50,10 @@
   background-color: #cc5200;
   transform: scale(1.05);
 }
+
+@media screen and (max-width: 768px) {
+  .rewards-page, .deals-page {
+    padding: 1rem;
+    text-align: center;
+  }
+}
