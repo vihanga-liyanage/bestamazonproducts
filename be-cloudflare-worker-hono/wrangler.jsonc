@@ -1,22 +1,42 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "be-cloudflare-worker-hono",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-02-14",
-	"observability": {
-		"enabled": true
-	},
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smarterpicks-be-prod",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-14",
+  "observability": {
+    "enabled": true
+  },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "bestamazonproducts",
-      "database_id": "49648e6a-a76a-4e49-8bd4-6505ffceb1bc"
+      "database_name": "smarterpicks-prod",
+      "database_id": "514b721c-405e-4d1b-a2a9-2b54bca240cf"
     }
   ],
   "r2_buckets": [
     {
       "binding": "R2_BUCKET",
-      "bucket_name": "bestamazonproducts-reward-requests"
+      "bucket_name": "smarterpicks-prod"
     }
-  ]
+  ],
+
+  // Development environment settings
+  "env": {
+    "dev": {
+      "name": "smarterpicks-be-dev",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "smarterpicks-dev",
+          "database_id": "9767f930-6c4c-4773-844f-462d711f19ce"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "R2_BUCKET",
+          "bucket_name": "smarterpicks-dev"
+        }
+      ]
+    }
+  }
 }
