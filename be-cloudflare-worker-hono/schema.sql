@@ -29,3 +29,13 @@ CREATE TABLE IF NOT EXISTS reward_requests (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
+
+CREATE TABLE reward_comments (
+    id TEXT PRIMARY KEY,
+    reward_request_id TEXT,
+    user_id TEXT,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reward_request_id) REFERENCES reward_requests(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

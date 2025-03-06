@@ -30,3 +30,11 @@ export const rewardRequests = sqliteTable("reward_requests", {
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
   updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
+
+export const rewardComments = sqliteTable("reward_comments", {
+  id: text("id").primaryKey(),
+  rewardRequestId: text("reward_request_id").notNull().references(() => rewardRequests.id),
+  userId: text("user_id").notNull(),
+  comment: text("comment").notNull(),
+  createdAt: integer("created_at").default(Date.now()),
+});

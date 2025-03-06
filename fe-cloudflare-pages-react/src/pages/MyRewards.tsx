@@ -1,24 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "../styles/MyRewards.css";
 import RewardRequestModal from "../components/RewardRequestModal";
-import { Product } from "../types/Product";
+import RewardRequestCard from "../components/RewardRequestCard";  // Import new component
+import { RewardRequest } from "../types/RewardRequest";
 import useProducts from "../hooks/useProducts";
 import { useUser } from "@clerk/clerk-react";
 import { syncUser } from "../utils/authUtils";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
-
-interface RewardRequest {
-  id: string;
-  userId: string;
-  product: Product;
-  status: string;
-  orderScreenshot?: string;
-  reviewScreenshot?: string;
-  reviewLink?: string;
-  proofOfPayment?: string;
-  comments: string[];
-}
 
 const MyRewards: React.FC = () => {
   const { user } = useUser();
@@ -34,55 +23,62 @@ const MyRewards: React.FC = () => {
 
   const fetchRewardRequests = async () => {
     if (!user) return;
-
+  
     try {
-      const response = await fetch(`${API_BASE_URL}/reward-requests/${user.id}`);
+      const response = await fetch(`${API_BASE_URL}/reward-requests?userId=${user.id}`);
       if (response.ok) {
         const data = await response.json();
-        setRequests(data);
+        
+        // Fetch comments for each request
+        const updatedRequests = await Promise.all(
+          data.map(async (request: RewardRequest) => ({
+            ...request,
+            comments: await fetchComments(request.id),
+          }))
+        );
+  
+        setRequests(updatedRequests);
       } else {
         setRequests([]);
       }
     } catch (error) {
       console.error("Error fetching reward requests:", error);
     }
-  };
+  };  
 
-  // Create a new reward request
   const handleSubmitRequest = async (productId: number, orderScreenshot: File | null) => {
     if (!orderScreenshot || !user) return;
-
+  
     const selectedProduct = products.find((p) => p.id === productId);
     if (!selectedProduct) return;
-
+  
     const formData = new FormData();
     formData.append("userId", user.id);
     formData.append("productId", String(productId));
     formData.append("orderScreenshot", orderScreenshot);
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/reward-requests`, {
         method: "POST",
         body: formData,
       });
-
+  
       if (response.ok) {
-        fetchRewardRequests();
+        fetchRewardRequests(); // Refresh the list
       } else {
         console.error("Error creating reward request:", await response.text());
       }
     } catch (error) {
       console.error("Error submitting reward request:", error);
     }
-  };
+  };  
 
-  // Handle image uploads for `reviewScreenshot` and `proofOfPayment`
   const handleImageUpload = async (rewardRequestId: string, imageFile: File, imageType: string) => {
     if (!user || !imageFile) return;
 
     const formData = new FormData();
     formData.append("id", rewardRequestId);
-    formData.append(imageType, imageFile); // Dynamically append correct image type
+    formData.append(imageType, imageFile);
 
     try {
       const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
@@ -100,6 +96,39 @@ const MyRewards: React.FC = () => {
     }
   };
 
+  const handleAddComment = async (rewardRequestId: string, comment: string) => {
+    if (!user || !comment.trim()) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, comment }),
+      });
+
+      if (response.ok) {
+        fetchRewardRequests();
+      } else {
+        console.error("Error adding comment:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+    }
+  };
+
+  const fetchComments = async (rewardRequestId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}/comments`);
+      if (response.ok) {
+        return await response.json();
+      }
+      return []; // Ensure it returns an empty array if no comments are found
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      return [];
+    }
+  };
+  
   return (
     <div className="my-rewards-page">
       <h1>My Rewards</h1>
@@ -113,7 +142,7 @@ const MyRewards: React.FC = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             products={products}
-            onSubmit={handleSubmitRequest} // ✅ Create a new reward request
+            onSubmit={(productId, orderScreenshot) => handleSubmitRequest(productId, orderScreenshot)}
           />
 
           {loading && <p>Loading reward products...</p>}
@@ -122,51 +151,12 @@ const MyRewards: React.FC = () => {
           <div className="requests-list">
             {requests.length > 0 ? (
               requests.map((request) => (
-                <div key={request.id} className="request-card">
-                  <div className="request-summary" onClick={(e) => e.currentTarget.nextElementSibling?.classList.toggle("expanded")}>
-                    {request.product?.image_url ? (
-                      <img src={request.product.image_url} alt={request.product.title} />
-                    ) : (
-                      <p>No Image Available</p>
-                    )}
-                    <div className="request-info">
-                      <h3>{request.product?.title ?? "Unknown Product"}</h3>
-                      <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
-                    </div>
-                  </div>
-
-                  <div className="request-details">
-                    {request.orderScreenshot ? (
-                      <img src={request.orderScreenshot} alt="Order Screenshot" />
-                    ) : (
-                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "orderScreenshot")} />
-                    )}
-
-                    {request.reviewScreenshot ? (
-                      <>
-                        <img src={request.reviewScreenshot} alt="Review Screenshot" />
-                        <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
-                      </>
-                    ) : (
-                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "reviewScreenshot")} />
-                    )}
-
-                    {request.proofOfPayment ? (
-                      <img src={request.proofOfPayment} alt="Proof of Payment" />
-                    ) : (
-                      <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "proofOfPayment")} />
-                    )}
-
-                    <div className="comments">
-                      <h4>Comments</h4>
-                      {request.comments?.length > 0 ? (
-                        request.comments.map((comment, index) => <p key={index}>{comment}</p>)
-                      ) : (
-                        <p>No comments yet.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <RewardRequestCard
+                  key={request.id}
+                  request={request}
+                  handleImageUpload={handleImageUpload}
+                  handleAddComment={handleAddComment}
+                />
               ))
             ) : (
               <p>No reward requests found.</p>
