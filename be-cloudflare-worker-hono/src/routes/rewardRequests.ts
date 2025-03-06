@@ -4,7 +4,7 @@ import { products, rewardRequests } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
-type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket };
+type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket; R2_BUCKET_URL: string; };
 type Variables = { DB: ReturnType<typeof connectDB> };
 
 const rewardRequestsRoute = new Hono<{ Bindings: Bindings; Variables: Variables }>();
@@ -15,7 +15,7 @@ rewardRequestsRoute.use("*", async (c, next) => {
 });
 
 // Helper function to upload an image to Cloudflare R2 and return the public URL
-const uploadImageToR2 = async (bucket: R2Bucket, file: File | null): Promise<string | undefined> => {
+const uploadImageToR2 = async (bucket: R2Bucket, file: File | null, bucketBaseUrl: string): Promise<string | undefined> => {
   if (!file) {
     return undefined;
   }
@@ -32,7 +32,7 @@ const uploadImageToR2 = async (bucket: R2Bucket, file: File | null): Promise<str
       return undefined;
     }
 
-    return `https://images.smarterpicks.org/${fileName}`;
+    return `${bucketBaseUrl}${fileName}`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
     return undefined;
@@ -106,7 +106,7 @@ rewardRequestsRoute.post("/", async (c) => {
   }
 
   // Upload order screenshot
-  const orderScreenshotUrl = await uploadImageToR2(bucket, orderScreenshot);
+  const orderScreenshotUrl = await uploadImageToR2(bucket, orderScreenshot, c.env.R2_BUCKET_URL);
 
   // Store reward request in the database
   await db.insert(rewardRequests).values({
@@ -138,8 +138,8 @@ rewardRequestsRoute.put("/:id", async (c) => {
   }
 
   // Upload images if provided
-  const reviewScreenshotUrl = await uploadImageToR2(bucket, reviewScreenshot);
-  const proofOfPaymentUrl = await uploadImageToR2(bucket, proofOfPayment);
+  const reviewScreenshotUrl = await uploadImageToR2(bucket, reviewScreenshot, c.env.R2_BUCKET_URL);
+  const proofOfPaymentUrl = await uploadImageToR2(bucket, proofOfPayment, c.env.R2_BUCKET_URL);
 
   // Update the reward request in the database
   await db

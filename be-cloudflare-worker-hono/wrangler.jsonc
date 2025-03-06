@@ -19,6 +19,9 @@
       "bucket_name": "smarterpicks-prod"
     }
   ],
+  "vars": {
+    "R2_BUCKET_URL": "https://images.smarterpicks.org/"
+  },
 
   // Development environment settings
   "env": {
@@ -36,7 +39,10 @@
           "binding": "R2_BUCKET",
           "bucket_name": "smarterpicks-dev"
         }
-      ]
+      ],
+      "vars": {
+        "R2_BUCKET_URL": "https://dev.images.smarterpicks.org/"
+      }
     }
   }
 }
