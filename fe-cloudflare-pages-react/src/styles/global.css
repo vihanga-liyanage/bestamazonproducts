@@ -1,12 +1,19 @@
 body {
   margin: 0;
   font-family: 'Trebuchet MS', sans-serif;
+  font-size: 16px;
 }
 
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+@media screen and (max-width: 768px) {
+  .app {
+    padding: 1rem;
+  }
 }
 
 .main-content {

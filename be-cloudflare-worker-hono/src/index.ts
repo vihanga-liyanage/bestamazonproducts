@@ -1,32 +1,32 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/d1';
-import { products } from './schema';
+import rewardRequests from './routes/rewardRequests';
+import users from './routes/users';
+import products from './routes/products';
+import { cors } from 'hono/cors';
 
-const app = new Hono<{ Bindings: { DB: D1Database } }>();
+type Bindings = {
+  DB: D1Database; // Cloudflare D1 Database type
+};
+
+type Variables = {
+  DB: ReturnType<typeof drizzle>; // Store Drizzle instance in context
+};
+
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Enable CORS
 app.use('*', cors());
 
-// Get all products
-app.get('/products', async (c) => {
-  const db = drizzle(c.env.DB); // Use the correct binding here
-  const result = await db.select().from(products).all();
-  return c.json(result);
+// Middleware: Attach database instance
+app.use('*', async (c, next) => {
+  c.set('DB', drizzle(c.env.DB));
+  await next();
 });
 
-// Add a new product
-app.post('/products', async (c) => {
-  const db = drizzle(c.env.DB); // Use the correct binding here
-  const { title, description, price, image_url, affiliate_url } = await c.req.json();
-  const result = await db.insert(products).values({
-    title,
-    description,
-    price,
-    image_url,
-    affiliate_url,
-  }).returning();
-  return c.json(result);
-});
+// Mount routes
+app.route('/reward-requests', rewardRequests);
+app.route('/users', users);
+app.route('/products', products);
 
 export default app;

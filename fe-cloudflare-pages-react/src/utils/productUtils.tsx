@@ -5,8 +5,8 @@ export const sortProducts = (products: Product[], sortBy: string) => {
     switch (sortBy) {
       case 'priceLowHigh': return a.price - b.price;
       case 'priceHighLow': return b.price - a.price;
-      case 'customerReviews': return b.customerReviews - a.customerReviews;
-      case 'bestSellers': return a.bestSellersRank - b.bestSellersRank;
+      case 'customerReviews': return (b.customerReviews ?? 0) - (a.customerReviews ?? 0);
+      case 'bestSellers': return (a.bestSellersRank ?? Number.MAX_VALUE) - (b.bestSellersRank ?? Number.MAX_VALUE);
       default: return 0;
     }
   });

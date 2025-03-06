@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Product } from '../types/Product';
 
-const useProducts = () => {
+const useProducts = (productType: string = '') => {
   const [products, setProducts] = useState<Product[]>([]);
   const [maxPrice, setMaxPrice] = useState(100);
   const [error, setError] = useState<string | null>(null);
@@ -10,9 +10,14 @@ const useProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/products`);
+        let url = `${import.meta.env.VITE_API_URL}/products`;
+        if (productType) {
+          url += `?type=${productType}`;
+        }
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
+
         setProducts(data);
         const newMaxPrice = Math.max(...data.map((p: Product) => p.price), 0) + 100;
         setMaxPrice(newMaxPrice);
@@ -24,7 +29,7 @@ const useProducts = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [productType]); // Re-fetch if productType changes
 
   return { products, maxPrice, error, loading };
 };

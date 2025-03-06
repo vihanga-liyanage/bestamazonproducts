@@ -1,11 +1,16 @@
 import React from 'react';
 import '../styles/Banner.css';
 
-const Banner: React.FC = () => {
+interface BannerProps {
+  title: string;
+  subtitle: string;
+}
+
+const Banner: React.FC<BannerProps> = ({ title, subtitle }) => {
   return (
     <div className="banner">
-      <h1>Today's Best Deals</h1>
-      <p>Don't miss out on these amazing offers!</p>
+      <h1>{title}</h1>
+      <p>{subtitle}</p>
     </div>
   );
 };
