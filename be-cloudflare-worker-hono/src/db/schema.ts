@@ -4,13 +4,13 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: integer("created_at").default(Date.now()),
 });
 
 export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
-  price: integer("price").notNull(),
+  price: real("price").notNull(),
   image_url: text("image_url").notNull(),
   affiliate_url: text("affiliate_url").notNull(),
   customerReviews: real("customer_reviews").default(0.0),
@@ -27,6 +27,14 @@ export const rewardRequests = sqliteTable("reward_requests", {
   reviewLink: text("review_link"),
   proofOfPayment: text("proof_of_payment"),
   comments: text("comments"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: integer("created_at").default(Date.now()),
+  updatedAt: integer("updated_at").default(Date.now()).$onUpdateFn(() => Date.now()),
+});
+
+export const rewardComments = sqliteTable("reward_comments", {
+  id: text("id").primaryKey(),
+  rewardRequestId: text("reward_request_id").notNull().references(() => rewardRequests.id),
+  userId: text("user_id").notNull().references(() => users.id),
+  comment: text("comment").notNull(),
+  createdAt: integer("created_at").default(Date.now()),
 });

@@ -1,7 +1,7 @@
 .my-rewards-page {
   padding: 2rem;
   text-align: center;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .submit-reward-btn {
@@ -89,4 +89,76 @@
 
 .comments h4 {
   margin-bottom: 0.5rem;
+}
+
+.comments {
+  text-align: left;
+  margin-top: 1rem;
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.comments h4 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+}
+
+.comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: white;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.comment p {
+  margin: 2px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.comment strong {
+  color: #222;
+  font-weight: bold;
+}
+
+.comment-timestamp {
+  font-size: 0.8rem;
+  color: gray;
+}
+
+.comment-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.comment-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+.comment-input button {
+  padding: 10px 15px;
+  background-color: #ff9900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.comment-input button:hover {
+  background-color: #cc7a00;
 }

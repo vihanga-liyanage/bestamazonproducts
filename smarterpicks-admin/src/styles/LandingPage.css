@@ -1,0 +1,14 @@
+.landing-container {
+  text-align: center;
+  padding: 50px;
+}
+
+.landing-container h1 {
+  font-size: 2rem;
+}
+
+.error-message {
+  margin-top: 20px;
+  color: red;
+  font-weight: bold;
+}

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { connectDB } from "../db/db";
-import { products, rewardRequests } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { products, rewardComments, rewardRequests, users } from "../db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket; R2_BUCKET_URL: string; };
@@ -39,16 +39,60 @@ const uploadImageToR2 = async (bucket: R2Bucket, file: File | null, bucketBaseUr
   }
 };
 
-
 // Fetch all reward requests for a user with product details
-rewardRequestsRoute.get("/:userId", async (c) => {
-  const userId = c.req.param("userId");
+rewardRequestsRoute.get("/", async (c) => {
   const db = c.get("DB");
 
   try {
     const results = await db
       .select({
-        rewardRequestId: rewardRequests.id,
+        id: rewardRequests.id,
+        userId: rewardRequests.userId,
+        userName: users.name,
+        status: rewardRequests.status,
+        orderScreenshot: rewardRequests.orderScreenshot,
+        reviewScreenshot: rewardRequests.reviewScreenshot,
+        reviewLink: rewardRequests.reviewLink,
+        proofOfPayment: rewardRequests.proofOfPayment,
+        comments: rewardRequests.comments,
+        createdAt: rewardRequests.createdAt,
+        updatedAt: rewardRequests.updatedAt,
+        product: {
+          id: products.id,
+          title: products.title,
+          price: products.price,
+          image_url: products.image_url,
+          affiliate_url: products.affiliate_url,
+        },
+      })
+      .from(rewardRequests)
+      .innerJoin(products, eq(rewardRequests.productId, products.id))
+      .innerJoin(users, eq(rewardRequests.userId, users.id))
+
+    if (results.length === 0) {
+      return c.json({ error: "No reward requests found for this user" }, 404);
+    }
+
+    return c.json(results);
+  } catch (error) {
+    console.error("Database query error:", error);
+    return c.json({ error: "Failed to fetch reward requests" }, 500);
+  }
+});
+
+// Fetch all reward requests for a user with product details
+rewardRequestsRoute.get("/", async (c) => {
+  const userId = c.req.query("userId");
+  const db = c.get("DB");
+
+  if (!userId) {
+    return c.json({ error: "Missing userId query parameter" }, 400);
+  }
+
+  try {
+    const results = await db
+      .select({
+        id: rewardRequests.id,
         userId: rewardRequests.userId,
         status: rewardRequests.status,
         orderScreenshot: rewardRequests.orderScreenshot,
@@ -64,7 +108,7 @@ rewardRequestsRoute.get("/:userId", async (c) => {
           price: products.price,
           image_url: products.image_url,
           affiliate_url: products.affiliate_url,
-        }
+        },
       })
       .from(rewardRequests)
       .innerJoin(products, eq(rewardRequests.productId, products.id))
@@ -150,11 +194,62 @@ rewardRequestsRoute.put("/:id", async (c) => {
       reviewLink: reviewLink ?? (existingRequest[0].reviewLink || ""),
       proofOfPayment: proofOfPaymentUrl ?? (existingRequest[0].proofOfPayment || ""),
       comments: comments ?? (existingRequest[0].comments || ""),
-      updatedAt: new Date().toISOString()
     })
     .where(eq(rewardRequests.id, id));
 
   return c.json({ success: true, reviewScreenshotUrl, proofOfPaymentUrl });
+});
+
+rewardRequestsRoute.get("/:id/comments", async (c) => {
+  const { id } = c.req.param();
+  const db = c.get("DB");
+
+  try {
+    const comments = await db
+      .select({
+        id: rewardComments.id,
+        comment: rewardComments.comment,
+        createdAt: rewardComments.createdAt,
+        userId: rewardComments.userId,
+        userName: users.name, // Fetch user name
+      })
+      .from(rewardComments)
+      .innerJoin(users, eq(rewardComments.userId, users.id)) // Join users table
+      .where(eq(rewardComments.rewardRequestId, id))
+      .orderBy(desc(rewardComments.createdAt));
+
+    if (comments.length === 0) {
+      return c.json({ error: "No comments found for this reward request" }, 404);
+    }
+    
+    return c.json(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return c.json({ error: "Failed to fetch comments" }, 500);
+  }
+});
+
+rewardRequestsRoute.post("/:id/comments", async (c) => {
+  const { id } = c.req.param();
+  const { userId, comment } = await c.req.json();
+  const db = c.get("DB");
+
+  if (!userId || !comment.trim()) {
+      return c.json({ error: "Invalid data" }, 400);
+  }
+
+  try {
+      await db.insert(rewardComments).values({
+          id: crypto.randomUUID(),
+          rewardRequestId: id,
+          userId: userId,
+          comment,
+      });
+
+      return c.json({ success: true });
+  } catch (error) {
+      return c.json({ error: "Failed to save comment" }, 500);
+  }
 });
 
 export default rewardRequestsRoute;
