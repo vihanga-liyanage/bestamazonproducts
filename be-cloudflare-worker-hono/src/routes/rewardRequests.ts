@@ -153,7 +153,6 @@ rewardRequestsRoute.put("/:id", async (c) => {
       reviewLink: reviewLink ?? (existingRequest[0].reviewLink || ""),
       proofOfPayment: proofOfPaymentUrl ?? (existingRequest[0].proofOfPayment || ""),
       comments: comments ?? (existingRequest[0].comments || ""),
-      updatedAt: new Date().toISOString()
     })
     .where(eq(rewardRequests.id, id));
 
