@@ -41,6 +41,47 @@ const uploadImageToR2 = async (bucket: R2Bucket, file: File | null, bucketBaseUr
 
 // Fetch all reward requests for a user with product details
 rewardRequestsRoute.get("/", async (c) => {
+  const db = c.get("DB");
+
+  try {
+    const results = await db
+      .select({
+        id: rewardRequests.id,
+        userId: rewardRequests.userId,
+        userName: users.name,
+        status: rewardRequests.status,
+        orderScreenshot: rewardRequests.orderScreenshot,
+        reviewScreenshot: rewardRequests.reviewScreenshot,
+        reviewLink: rewardRequests.reviewLink,
+        proofOfPayment: rewardRequests.proofOfPayment,
+        comments: rewardRequests.comments,
+        createdAt: rewardRequests.createdAt,
+        updatedAt: rewardRequests.updatedAt,
+        product: {
+          id: products.id,
+          title: products.title,
+          price: products.price,
+          image_url: products.image_url,
+          affiliate_url: products.affiliate_url,
+        },
+      })
+      .from(rewardRequests)
+      .innerJoin(products, eq(rewardRequests.productId, products.id))
+      .innerJoin(users, eq(rewardRequests.userId, users.id))
+
+    if (results.length === 0) {
+      return c.json({ error: "No reward requests found for this user" }, 404);
+    }
+
+    return c.json(results);
+  } catch (error) {
+    console.error("Database query error:", error);
+    return c.json({ error: "Failed to fetch reward requests" }, 500);
+  }
+});
+
+// Fetch all reward requests for a user with product details
+rewardRequestsRoute.get("/", async (c) => {
   const userId = c.req.query("userId");
   const db = c.get("DB");
 
