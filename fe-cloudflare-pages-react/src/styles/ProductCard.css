@@ -27,9 +27,9 @@
 .product-card h3 {
   font-size: 1.2rem;
   margin: 0;
-  height: 3rem; /* Fixed height to fit two lines */
-  line-height: 1.5rem; /* Ensure proper spacing */
-  overflow: hidden; /* Hide extra text */
+  height: 3rem;
+  line-height: 1.5rem;
+  overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
@@ -53,8 +53,10 @@
 
 @media screen and (max-width: 768px) {
   .image-container {
-    width: 50%vh;
-    height: 150px;
+    width: 30vw;
+    height: 30vw;
+    max-width: 150px;
+    max-height: 150px;
   }
 
   .product-card h3 {
