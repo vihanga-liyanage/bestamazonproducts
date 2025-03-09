@@ -8,6 +8,7 @@
 
 @media screen and (max-width: 768px) {
   .product-grid {
-    grid-template-columns: 1fr; /* Single column */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
