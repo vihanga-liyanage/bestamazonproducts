@@ -200,4 +200,8 @@
   .sidebar.open {
     display: block; /* Show when toggled */
   }
+
+  .scrollable-grid {
+    padding: 0;
+  }
 }

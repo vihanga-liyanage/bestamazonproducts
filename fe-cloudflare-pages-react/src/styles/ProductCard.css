@@ -31,7 +31,6 @@
   line-height: 1.5rem; /* Ensure proper spacing */
   overflow: hidden; /* Hide extra text */
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
   white-space: normal;
@@ -54,7 +53,7 @@
 
 @media screen and (max-width: 768px) {
   .image-container {
-    width: 150px;
+    width: 50%vh;
     height: 150px;
   }
 
