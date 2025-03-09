@@ -15,17 +15,24 @@ rewardRequestsRoute.use("*", async (c, next) => {
 });
 
 // Helper function to upload an image to Cloudflare R2 and return the public URL
-const uploadImageToR2 = async (bucket: R2Bucket, file: File | null, bucketBaseUrl: string): Promise<string | undefined> => {
+const uploadImageToR2 = async (
+  bucket: R2Bucket,
+  file: File | null,
+  bucketBaseUrl: string
+): Promise<string | undefined> => {
   if (!file) {
+    console.warn("No file provided for upload.");
     return undefined;
   }
 
   const imageId = uuidv4();
-  const fileExtension = file.name.split(".").pop();
+  const fileExtension = file.name.split(".").pop() || "jpg"; // Default to jpg if no extension
   const fileName = `${imageId}.${fileExtension}`;
 
   try {
-    const result = await bucket.put(fileName, file.stream(), { httpMetadata: { contentType: file.type } });
+    const result = await bucket.put(fileName, file.stream(), {
+      httpMetadata: { contentType: file.type },
+    });
 
     if (!result) {
       console.error("Upload failed: No result from put()");
@@ -34,17 +41,38 @@ const uploadImageToR2 = async (bucket: R2Bucket, file: File | null, bucketBaseUr
 
     return `${bucketBaseUrl}${fileName}`;
   } catch (error) {
-    console.error("Error uploading to R2:", error);
+    console.error(`Error uploading ${fileName} to R2:`, error);
     return undefined;
   }
 };
 
-// Fetch all reward requests for a user with product details
-rewardRequestsRoute.get("/", async (c) => {
-  const db = c.get("DB");
+// Helper function to delete an image from Cloudflare R2
+const deleteImageFromR2 = async (bucket: R2Bucket, imageUrl: string | null): Promise<void> => {
+  if (!imageUrl) {
+    console.log("No image URL provided for deletion. Skipping...");
+    return;
+  }
 
   try {
-    const results = await db
+    const imageKey = imageUrl.split("/").pop();
+    if (!imageKey) {
+      console.error("Invalid image URL format:", imageUrl);
+      return;
+    }
+
+    await bucket.delete(imageKey);
+    console.log(`Deleted image: ${imageKey}`);
+  } catch (error) {
+    console.error(`Error deleting image ${imageUrl} from R2:`, error);
+  }
+};
+
+rewardRequestsRoute.get("/", async (c) => {
+  const db = c.get("DB");
+  const userId = c.req.query("userId");
+
+  try {
+    const baseQuery = db
       .select({
         id: rewardRequests.id,
         userId: rewardRequests.userId,
@@ -67,55 +95,15 @@ rewardRequestsRoute.get("/", async (c) => {
       })
       .from(rewardRequests)
       .innerJoin(products, eq(rewardRequests.productId, products.id))
-      .innerJoin(users, eq(rewardRequests.userId, users.id))
+      .innerJoin(users, eq(rewardRequests.userId, users.id));
+
+    // Apply userId filter if provided
+    const results = userId
+      ? await baseQuery.where(eq(rewardRequests.userId, userId))
+      : await baseQuery;
 
     if (results.length === 0) {
-      return c.json({ error: "No reward requests found for this user" }, 404);
-    }
-
-    return c.json(results);
-  } catch (error) {
-    console.error("Database query error:", error);
-    return c.json({ error: "Failed to fetch reward requests" }, 500);
-  }
-});
-
-// Fetch all reward requests for a user with product details
-rewardRequestsRoute.get("/", async (c) => {
-  const userId = c.req.query("userId");
-  const db = c.get("DB");
-
-  if (!userId) {
-    return c.json({ error: "Missing userId query parameter" }, 400);
-  }
-
-  try {
-    const results = await db
-      .select({
-        id: rewardRequests.id,
-        userId: rewardRequests.userId,
-        status: rewardRequests.status,
-        orderScreenshot: rewardRequests.orderScreenshot,
-        reviewScreenshot: rewardRequests.reviewScreenshot,
-        reviewLink: rewardRequests.reviewLink,
-        proofOfPayment: rewardRequests.proofOfPayment,
-        comments: rewardRequests.comments,
-        createdAt: rewardRequests.createdAt,
-        updatedAt: rewardRequests.updatedAt,
-        product: {
-          id: products.id,
-          title: products.title,
-          price: products.price,
-          image_url: products.image_url,
-          affiliate_url: products.affiliate_url,
-        },
-      })
-      .from(rewardRequests)
-      .innerJoin(products, eq(rewardRequests.productId, products.id))
-      .where(eq(rewardRequests.userId, userId));
-
-    if (results.length === 0) {
-      return c.json({ error: "No reward requests found for this user" }, 404);
+      return c.json({ error: "No reward requests found" }, 404);
     }
 
     return c.json(results);
@@ -200,8 +188,51 @@ rewardRequestsRoute.put("/:id", async (c) => {
   return c.json({ success: true, reviewScreenshotUrl, proofOfPaymentUrl });
 });
 
+rewardRequestsRoute.delete("/:id", async (c) => {
+  const db = c.get("DB");
+  const bucket = c.env.R2_BUCKET;
+  const id = Number(c.req.param("id"));
+
+  if (isNaN(id)) {
+    return c.json({ error: "Invalid reward request ID" }, 400);
+  }
+
+  try {
+    // Fetch reward request details (for image deletion)
+    const existingRequest = await db
+      .select({
+        orderScreenshot: rewardRequests.orderScreenshot,
+        reviewScreenshot: rewardRequests.reviewScreenshot,
+        proofOfPayment: rewardRequests.proofOfPayment,
+      })
+      .from(rewardRequests)
+      .where(eq(rewardRequests.id, id));
+
+    if (existingRequest.length === 0) {
+      return c.json({ error: "Reward request not found" }, 404);
+    }
+
+    const { orderScreenshot, reviewScreenshot, proofOfPayment } = existingRequest[0];
+
+    // Delete images from R2
+    await Promise.all([
+      deleteImageFromR2(bucket, orderScreenshot),
+      deleteImageFromR2(bucket, reviewScreenshot),
+      deleteImageFromR2(bucket, proofOfPayment),
+    ]);
+
+    // Delete the reward request
+    await db.delete(rewardRequests).where(eq(rewardRequests.id, id));
+
+    return c.json({ success: true, message: "Reward request and associated data deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting reward request:", error);
+    return c.json({ error: "Failed to delete reward request" }, 500);
+  }
+});
+
 rewardRequestsRoute.get("/:id/comments", async (c) => {
-  const { id } = c.req.param();
+  const id = Number(c.req.param("id"));
   const db = c.get("DB");
 
   try {
@@ -230,7 +261,7 @@ rewardRequestsRoute.get("/:id/comments", async (c) => {
 });
 
 rewardRequestsRoute.post("/:id/comments", async (c) => {
-  const { id } = c.req.param();
+  const id = Number(c.req.param("id"));
   const { userId, comment } = await c.req.json();
   const db = c.get("DB");
 

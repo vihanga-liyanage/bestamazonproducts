@@ -73,11 +73,32 @@ const MyRewards: React.FC = () => {
     }
   };  
 
-  const handleImageUpload = async (rewardRequestId: string, imageFile: File, imageType: string) => {
+  const handleDeleteRequest = async (rewardRequestId: number) => {
+    if (!user) return;
+  
+    const confirmDelete = window.confirm("Are you sure you want to delete this reward request? This action cannot be undone.");
+    if (!confirmDelete) return;
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        setRequests((prevRequests) => prevRequests.filter((req) => req.id !== rewardRequestId));
+      } else {
+        console.error("Error deleting reward request:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error deleting reward request:", error);
+    }
+  };
+  
+  const handleImageUpload = async (rewardRequestId: number, imageFile: File, imageType: string) => {
     if (!user || !imageFile) return;
 
     const formData = new FormData();
-    formData.append("id", rewardRequestId);
+    formData.append("id", String(rewardRequestId));
     formData.append(imageType, imageFile);
 
     try {
@@ -96,7 +117,7 @@ const MyRewards: React.FC = () => {
     }
   };
 
-  const handleAddComment = async (rewardRequestId: string, comment: string) => {
+  const handleAddComment = async (rewardRequestId: number, comment: string) => {
     if (!user || !comment.trim()) return;
 
     try {
@@ -116,7 +137,7 @@ const MyRewards: React.FC = () => {
     }
   };
 
-  const fetchComments = async (rewardRequestId: string) => {
+  const fetchComments = async (rewardRequestId: number) => {
     try {
       const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}/comments`);
       if (response.ok) {
@@ -156,6 +177,7 @@ const MyRewards: React.FC = () => {
                   request={request}
                   handleImageUpload={handleImageUpload}
                   handleAddComment={handleAddComment}
+                  handleDeleteRequest={handleDeleteRequest}
                 />
               ))
             ) : (

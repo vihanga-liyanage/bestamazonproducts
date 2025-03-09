@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { RewardRequest } from "../types/RewardRequest";
+import { FaTrash } from "react-icons/fa";
 
 interface RewardRequestCardProps {
   request: RewardRequest;
-  handleImageUpload: (rewardRequestId: string, imageFile: File, imageType: string) => void;
-  handleAddComment: (rewardRequestId: string, comment: string) => void;
+  handleImageUpload: (rewardRequestId: number, imageFile: File, imageType: string) => void;
+  handleAddComment: (rewardRequestId: number, comment: string) => void;
+  handleDeleteRequest: (rewardRequestId: number) => void;
 }
 
-const RewardRequestCard: React.FC<RewardRequestCardProps> = ({ request, handleImageUpload, handleAddComment }) => {
+const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
+  request,
+  handleImageUpload,
+  handleAddComment,
+  handleDeleteRequest,
+}) => {
   const [commentInput, setCommentInput] = useState("");
 
   return (
@@ -22,6 +29,10 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({ request, handleIm
           <h3>{request.product?.title ?? "Unknown Product"}</h3>
           <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
         </div>
+
+        <button className="delete-btn" onClick={() => handleDeleteRequest(request.id)} title="Delete Request">
+          <FaTrash />
+        </button>
       </div>
 
       <div className="request-details">
@@ -69,7 +80,6 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({ request, handleIm
             <button onClick={() => { handleAddComment(request.id, commentInput); setCommentInput(""); }}>Send</button>
           </div>
         </div>
-
       </div>
     </div>
   );

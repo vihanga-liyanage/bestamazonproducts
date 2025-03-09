@@ -2,7 +2,7 @@ import { Product } from "./Product";
 import { RewardComment } from "./RewardComment";
 
 export interface RewardRequest {
-  id: string;
+  id: number;
   userId: string;
   product: Product;
   status: string;

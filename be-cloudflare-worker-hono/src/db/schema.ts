@@ -33,7 +33,7 @@ export const rewardRequests = sqliteTable("reward_requests", {
 
 export const rewardComments = sqliteTable("reward_comments", {
   id: text("id").primaryKey(),
-  rewardRequestId: text("reward_request_id").notNull().references(() => rewardRequests.id),
+  rewardRequestId: integer("reward_request_id").notNull().references(() => rewardRequests.id),
   userId: text("user_id").notNull().references(() => users.id),
   comment: text("comment").notNull(),
   createdAt: integer("created_at").default(Date.now()),
