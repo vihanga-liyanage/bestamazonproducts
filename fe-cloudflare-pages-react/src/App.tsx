@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Deals from './pages/Deals';
 import './styles/global.css';
 import MyRewards from './pages/MyRewards';
+import FAQ from './pages/FAQ';
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -29,6 +30,7 @@ const App: React.FC = () => {
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/deals" element={<Deals />} />
             <Route path="/my-rewards" element={<MyRewards />} />
+            <Route path="/faq" element={<FAQ />} />
           </Routes>
           <Footer />
         </div>
