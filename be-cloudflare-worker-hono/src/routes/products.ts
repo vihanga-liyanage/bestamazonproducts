@@ -13,11 +13,16 @@ productsRoute.use("*", async (c, next) => {
   await next();
 });
 
-// Fetch all products
+// Fetch all products with optional isReward filter
 productsRoute.get("/", async (c) => {
   const db = c.get("DB");
+  const isRewardParam = Number(c.req.query("isReward"));
 
-  const results = await db.select().from(products);
+  let query = db.select().from(products);
+
+  const results = isRewardParam
+    ? await query.where(eq(products.isReward, isRewardParam))
+    : await query;
 
   if (results.length === 0) {
     return c.json({ error: "No products found" }, 404);
@@ -25,6 +30,7 @@ productsRoute.get("/", async (c) => {
 
   return c.json(results);
 });
+
 
 // Fetch a single product by ID
 productsRoute.get("/:id", async (c) => {

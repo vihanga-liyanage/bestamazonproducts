@@ -6,12 +6,12 @@ import { filterProducts, sortProducts } from '../utils/productUtils';
 import useProducts from '../hooks/useProducts';
 
 interface Props {
-  productType: string;
+  isReward: number;
 }
 
-const ProductGridWithSidebar: React.FC<Props> = ({ productType }) => {
+const ProductGridWithSidebar: React.FC<Props> = ({ isReward }) => {
 
-  const { products, maxPrice, error, loading } = useProducts(productType);
+  const { products, maxPrice, error, loading } = useProducts(isReward);
   const [sortBy, setSortBy] = useState<string>('priceHighLow');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [tempPriceRange, setTempPriceRange] = useState<[number, number]>([0, maxPrice]);

@@ -11,7 +11,7 @@ const Rewards: React.FC = () => {
       <Banner title="Get Free Amazon Products!" subtitle="Order a product, leave a 5-star review, and get your money back!" />
       
       <SignedIn>
-        <ProductGridWithSidebar productType='rewards' />
+        <ProductGridWithSidebar isReward={1} />
       </SignedIn>
 
       <SignedOut>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/MyRewards.css";
 import RewardRequestModal from "../components/RewardRequestModal";
-import RewardRequestCard from "../components/RewardRequestCard";  // Import new component
+import RewardRequestCard from "../components/RewardRequestCard";
 import { RewardRequest } from "../types/RewardRequest";
 import useProducts from "../hooks/useProducts";
 import { useUser } from "@clerk/clerk-react";
@@ -11,7 +11,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 const MyRewards: React.FC = () => {
   const { user } = useUser();
-  const { products, error, loading } = useProducts("rewards");
+  const { products, error, loading } = useProducts(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [requests, setRequests] = useState<RewardRequest[]>([]);
 

@@ -15,6 +15,7 @@ export const products = sqliteTable("products", {
   affiliate_url: text("affiliate_url").notNull(),
   customerReviews: real("customer_reviews").default(0.0),
   bestSellersRank: integer("best_sellers_rank").default(0),
+  isReward: integer("is_reward").default(0).notNull(),
 });
 
 export const rewardRequests = sqliteTable("reward_requests", {

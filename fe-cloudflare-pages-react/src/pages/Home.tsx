@@ -8,7 +8,7 @@ const Home: React.FC = () => {
   return (
     <div className="app">
       <Banner title="🔥 Exclusive Deals Today!" subtitle="Hurry, these offers won’t last long!" />
-      <ProductGridWithSidebar productType={''} />
+      <ProductGridWithSidebar isReward={0} />
     </div>
   );
 };
