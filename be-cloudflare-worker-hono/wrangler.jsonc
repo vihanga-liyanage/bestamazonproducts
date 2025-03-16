@@ -6,6 +6,7 @@
   "observability": {
     "enabled": true
   },
+  // Cloudflare D1 Database Configuration
   "d1_databases": [
     {
       "binding": "DB",
@@ -13,17 +14,22 @@
       "database_id": "514b721c-405e-4d1b-a2a9-2b54bca240cf"
     }
   ],
+  // Cloudflare R2 Bucket Configuration
   "r2_buckets": [
     {
       "binding": "R2_BUCKET",
       "bucket_name": "smarterpicks-prod"
     }
   ],
+  // Global Environment Variables for Production
   "vars": {
-    "R2_BUCKET_URL": "https://images.smarterpicks.org/"
+    "R2_BUCKET_URL": "https://images.smarterpicks.org/",
+    "AMAZON_ACCESS_KEY": "AKPAC6X9FW1741840761",
+    "AMAZON_SECRET_KEY": "TVTX/WCOBuS/FIPz/SMtxMzNSxXFx8a1NebBs4il",
+    "AMAZON_ASSOCIATE_TAG": "smarterpick09-20"
   },
 
-  // Development environment settings
+  // Development Environment Configuration
   "env": {
     "dev": {
       "name": "smarterpicks-be-dev",
@@ -40,8 +46,13 @@
           "bucket_name": "smarterpicks-dev"
         }
       ],
+
+      // Environment Variables for Development
       "vars": {
-        "R2_BUCKET_URL": "https://dev.images.smarterpicks.org/"
+        "R2_BUCKET_URL": "https://dev.images.smarterpicks.org/",
+        "AMAZON_ACCESS_KEY": "AKPAC6X9FW1741840761",
+        "AMAZON_SECRET_KEY": "TVTX/WCOBuS/FIPz/SMtxMzNSxXFx8a1NebBs4il",
+        "AMAZON_ASSOCIATE_TAG": "smarterpick09-20"
       }
     }
   }
