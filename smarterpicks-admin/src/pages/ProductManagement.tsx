@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import "../styles/ProductManagement.css"; // Import the CSS file
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -47,42 +48,53 @@ const ProductManagement: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="product-management-container">
       <h1>Manage Reward Products</h1>
 
-      <div>
-        <button onClick={() => setMode("add")} disabled={mode === "add"}>Add Reward Products</button>
-        <button onClick={() => setMode("remove")} disabled={mode === "remove"}>Remove Reward Products</button>
+      {/* Toggle Buttons */}
+      <div className="mode-toggle">
+        <button 
+          className={mode === "add" ? "active" : ""}
+          onClick={() => setMode("add")}
+        >
+          Add Reward Products
+        </button>
+        <button 
+          className={mode === "remove" ? "active" : ""}
+          onClick={() => setMode("remove")}
+        >
+          Remove Reward Products
+        </button>
       </div>
 
       <h3>{mode === "add" ? "Add Products to Rewards" : "Remove Products from Rewards"}</h3>
+
       <textarea
         value={asinList}
         onChange={(e) => setAsinList(e.target.value)}
         placeholder="Paste ASINs, one per line..."
         rows={5}
-        cols={50}
       />
 
-      <button onClick={handlePreviewChanges} disabled={loading}>
+      <button onClick={handlePreviewChanges} className="preview-button" disabled={loading}>
         {loading ? "Processing..." : "Preview Changes"}
       </button>
 
       {summary && (
-        <div>
+        <div className="summary-container">
           <h3>Summary of Changes</h3>
           {mode === "add" ? (
             <>
               <p>New Products to be Added: {summary.fetchedProducts?.length}</p>
               <p>Products to be Updated (isReward = 1): {summary.productsToUpdate?.length}</p>
-              {summary.errorASINs && summary.errorASINs.length > 0 && (
-                <div>
+              {summary.errorASINs?.length > 0 && (
+                <div className="error-box">
                   <p>ASINs with errors:</p>
-                  <ul>
-                    {summary.errorASINs.map((asin: string, index: number) => (
-                      <li key={index}>{asin}</li>
-                    ))}
-                  </ul>
+                  
+                  {summary.errorASINs.map((asin: string) => (
+                    <>{asin} </>
+                  ))}
+                  
                 </div>
               )}
             </>
@@ -90,13 +102,13 @@ const ProductManagement: React.FC = () => {
             <p>Products to be Removed from Rewards: {summary.productsToRemove?.length}</p>
           )}
 
-          <button onClick={handleConfirmChanges} disabled={loading}>
+          <button onClick={handleConfirmChanges} className="confirm-button" disabled={loading}>
             {loading ? "Processing..." : "Confirm & Apply Changes"}
           </button>
         </div>
       )}
 
-      {message && <p>{message}</p>}
+      {message && <p className="message-box">{message}</p>}
     </div>
   );
 };
