@@ -9,6 +9,7 @@ export const users = sqliteTable("users", {
 
 export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  asin: text("asin").notNull().unique(),
   title: text("title").notNull(),
   price: real("price").notNull(),
   image_url: text("image_url").notNull(),

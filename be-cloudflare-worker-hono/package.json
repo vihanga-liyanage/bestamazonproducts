@@ -7,6 +7,10 @@
 	},
 	"dependencies": {
 		"@cloudflare/d1": "^1.4.1",
+		"amazon-paapi": "^1.0.7",
+		"aws-sdk": "^2.1692.0",
+		"axios": "^1.8.2",
+		"crypto-js": "^4.2.0",
 		"drizzle-orm": "^0.39.3",
 		"hono": "^4.7.2",
 		"uuid": "^11.1.0"
