@@ -22,13 +22,15 @@ productsRoute.use("*", async (c, next) => {
 // Fetch all products with optional isReward filter
 productsRoute.get("/", async (c) => {
   const db = c.get("DB");
-  const isRewardParam = Number(c.req.query("isReward"));
-
   let query = db.select().from(products);
 
-  const results = (isRewardParam !== null)
-    ? await query.where(eq(products.isReward, isRewardParam))
-    : await query;
+  let results = [];
+  if (c.req.query("isReward")) {
+    const isRewardParam = Number(c.req.query("isReward"));
+    results = await query.where(eq(products.isReward, isRewardParam));
+  } else {
+    results = await query;
+  }
 
   if (results.length === 0) {
     return c.json({ error: "No products found" }, 404);

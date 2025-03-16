@@ -50,9 +50,9 @@
       // Environment Variables for Development
       "vars": {
         "R2_BUCKET_URL": "https://dev.images.smarterpicks.org/",
-        "AMAZON_ACCESS_KEY": "AKPASEP1OH1741668105",
-        "AMAZON_SECRET_KEY": "2JrOUi98jPOvNKhAWyUyGnyq1H4C4NqFttyFhZLP",
-        "AMAZON_ASSOCIATE_TAG": "your-development-associate-tag"
+        "AMAZON_ACCESS_KEY": "AKPAC6X9FW1741840761",
+        "AMAZON_SECRET_KEY": "TVTX/WCOBuS/FIPz/SMtxMzNSxXFx8a1NebBs4il",
+        "AMAZON_ASSOCIATE_TAG": "smarterpick09-20"
       }
     }
   }
