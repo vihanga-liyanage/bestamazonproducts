@@ -11,6 +11,11 @@ interface Bindings {
   AMAZON_ASSOCIATE_TAG: string;
 }
 
+export interface Results {
+  fetchedProducts?: any[];
+  errorASINs?: string[];
+}
+
 /**
  * Converts ArrayBuffer to Hex String
  */
@@ -75,10 +80,45 @@ async function signRequest(payload: string, env: Bindings): Promise<{ signature:
 }
 
 /**
+ * Format the title
+ */
+function formatTitle(title: string, wordLimit: number = 5): string {
+  // Normalize spaces and remove punctuation from start and end of the title
+  title = title.replace(/\s+/g, " ").trim();
+  title = title.replace(/^[.,!?|()\[\]{}<>-]+|[.,!?|()\[\]{}<>-]+$/g, "");
+
+  // Split into words, remove punctuation from each word
+  let words = title.split(" ").map(word => word.replace(/^[.,!?|()\[\]{}<>-]+|[.,!?|()\[\]{}<>-]+$/g, ""));
+
+  // Cap words to the limit
+  if (words.length > wordLimit) {
+    words = words.slice(0, wordLimit);
+  }
+
+  // Remove unnecessary stop words from the end
+  const stopWords = new Set(["and", "or", "for", "with", "the", "a", "an", "of", "to", "on", "at", "by"]);
+  while (words.length > 1 && stopWords.has(words[words.length - 1].toLowerCase())) {
+    words.pop();
+  }
+
+  // Check for duplicated last two words and remove the duplicate
+  if (words.length > 1 && words[words.length - 1].toLowerCase() === words[words.length - 2].toLowerCase()) {
+    words.pop();
+  }
+
+  // Join words back and remove any trailing punctuation again
+  let finalTitle = words.join(" ").trim();
+  finalTitle = finalTitle.replace(/[.,!?|()\[\]{}<>-]+$/g, ""); // Ensure no punctuation at the end
+
+  // Capitalize each word properly
+  return finalTitle.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
+}
+
+/**
  * Fetch product details from Amazon PA-API 5.0 (Cloudflare Workers Compatible)
  */
-export async function fetchAmazonProductDetails(asins: string[], env: Bindings) {
-  if (asins.length === 0) return [];
+export async function fetchAmazonProductDetails(asins: string[], env: Bindings): Promise<Results> {
+  if (asins.length === 0) return { fetchedProducts: [], errorASINs: [] };
 
   // Split ASINs into chunks of 10 (Amazon limit)
   const chunkArray = (array: string[], chunkSize: number) => {
@@ -91,6 +131,7 @@ export async function fetchAmazonProductDetails(asins: string[], env: Bindings) 
 
   const asinChunks = chunkArray(asins, 10);
   let allResults: any[] = [];
+  let errorASINs: string[] = [];
 
   for (const asinChunk of asinChunks) {
     const params = {
@@ -127,22 +168,35 @@ export async function fetchAmazonProductDetails(asins: string[], env: Bindings) 
       });
 
       if (response.data.ItemsResult?.Items) {
-        const extractedProducts = response.data.ItemsResult.Items.map((item: any) => ({
-          title: item.ItemInfo?.Title?.DisplayValue || "Unknown Title",
-          price: item.Offers?.Listings?.[0]?.Price?.Amount || 0,
-          image_url: item.Images?.Primary?.Medium?.URL || "",
-          affiliate_url: `https://www.amazon.com/dp/${item.ASIN}?tag=${env.AMAZON_ASSOCIATE_TAG}`,
-          customerReviews: 0,
-          bestSellersRank: 0,
-          isReward: 1,
-        }));
+        response.data.ItemsResult.Items.forEach((item: any) => {
+          const asin = item.ASIN;
+          const title = item.ItemInfo?.Title?.DisplayValue;
+          const price = item.Offers?.Listings?.[0]?.Price?.Amount;
+          const image_url = item.Images?.Primary?.Medium?.URL;
 
-        allResults = allResults.concat(extractedProducts);
+          if (!asin || !title || !price || !image_url) {
+            console.error(`Skipping ASIN ${asin || "UNKNOWN"} due to missing data.`);
+            errorASINs.push(asin || "UNKNOWN");
+            return;
+          }
+
+          allResults.push({
+            asin: asin,
+            title: formatTitle(title),
+            price,
+            image_url,
+            affiliate_url: `https://www.amazon.com/dp/${asin}?tag=${env.AMAZON_ASSOCIATE_TAG}`,
+            customerReviews: 0,
+            bestSellersRank: 0,
+            isReward: 1,
+          });
+        });
       }
     } catch (error) {
       console.error("Error fetching Amazon products:", error);
+      errorASINs.push(...asinChunk);
     }
   }
 
-  return allResults;
+  return { fetchedProducts: allResults, errorASINs };
 }

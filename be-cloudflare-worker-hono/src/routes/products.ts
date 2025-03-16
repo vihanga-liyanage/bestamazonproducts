@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { connectDB } from "../db/db";
 import { products } from "../db/schema";
 import { eq, inArray } from "drizzle-orm";
-import { fetchAmazonProductDetails } from "../utils/fetchAmazonProductDetails";
+import { fetchAmazonProductDetails, Results } from "../utils/fetchAmazonProductDetails";
 
 type Bindings = {
   DB: D1Database;
@@ -128,11 +128,11 @@ productsRoute.post("/preview-add-reward-products", async (c) => {
 
   const existingASINs = existingProducts.map((p) => p.asin);
   const missingASINs = asins.filter((asin: string) => !existingASINs.includes(asin));
-  const newProducts = await fetchAmazonProductDetails(missingASINs, env);
+  const { fetchedProducts, errorASINs } = await fetchAmazonProductDetails(missingASINs, env);
 
   const productsToUpdate = existingProducts.filter((p) => asins.includes(p.asin) && p.isReward === 0);
 
-  return c.json({ newProducts, productsToUpdate });
+  return c.json({ fetchedProducts, productsToUpdate, errorASINs });
 });
 
 /**
@@ -154,14 +154,15 @@ productsRoute.post("/update-add-reward-products", async (c) => {
   const newASINs = asins.filter((asin: string) => !existingASINs.includes(asin));
 
   // Fetch details only for new ASINs
-  let newProducts = [];
   if (newASINs.length > 0) {
-    newProducts = await fetchAmazonProductDetails(newASINs, env);
-  }
-
-  // Insert only missing ASINs
-  if (newProducts.length > 0) {
-    await db.insert(products).values(newProducts);
+    const { fetchedProducts, errorASINs }  = await fetchAmazonProductDetails(newASINs, env);
+    // Insert only missing ASINs, 10 per batch
+    if (fetchedProducts && fetchedProducts.length > 0) {
+      for (let i = 0; i < fetchedProducts.length; i += 10) {
+        const batch = fetchedProducts.slice(i, i + 10);
+        await db.insert(products).values(batch);
+      }
+    }
   }
 
   // Update `isReward = 1` for ASINs already in DB

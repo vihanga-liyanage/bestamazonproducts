@@ -73,11 +73,21 @@ const ProductManagement: React.FC = () => {
           <h3>Summary of Changes</h3>
           {mode === "add" ? (
             <>
-              <p>New Products to be Added: {summary.newProducts.length}</p>
-              <p>Products to be Updated (isReward = 1): {summary.productsToUpdate.length}</p>
+              <p>New Products to be Added: {summary.fetchedProducts?.length}</p>
+              <p>Products to be Updated (isReward = 1): {summary.productsToUpdate?.length}</p>
+              {summary.errorASINs && summary.errorASINs.length > 0 && (
+                <div>
+                  <p>ASINs with errors:</p>
+                  <ul>
+                    {summary.errorASINs.map((asin: string, index: number) => (
+                      <li key={index}>{asin}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </>
           ) : (
-            <p>Products to be Removed from Rewards: {summary.productsToRemove.length}</p>
+            <p>Products to be Removed from Rewards: {summary.productsToRemove?.length}</p>
           )}
 
           <button onClick={handleConfirmChanges} disabled={loading}>
