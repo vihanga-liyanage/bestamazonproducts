@@ -188,6 +188,47 @@ rewardRequestsRoute.put("/:id", async (c) => {
   return c.json({ success: true, reviewScreenshotUrl, proofOfPaymentUrl });
 });
 
+// Update the status of a reward request
+rewardRequestsRoute.put("/:id/status", async (c) => {
+  const id = Number(c.req.param("id"));
+  const { userId, status } = await c.req.json();
+  const db = c.get("DB");
+
+  if (!userId) {
+    return c.json({ error: "Invalid data" }, 400);
+  }
+
+  // Check if the reward request exists
+  const existingRequest = await db.select().from(rewardRequests).where(eq(rewardRequests.id, id)).limit(1);
+  
+  if (existingRequest.length === 0) {
+    return c.json({ error: "Reward request not found" }, 404);
+  } else if (existingRequest[0].status == status) {
+    return c.json({ error: "Reward request already has this status" }, 400);
+  } 
+
+  try {
+    // Update the reward request in the database
+    await db.update(rewardRequests)
+      .set({
+        status: status,
+      })
+      .where(eq(rewardRequests.id, id));
+
+    // Add a comment to specify the status change
+    await db.insert(rewardComments).values({
+      id: crypto.randomUUID(),
+      rewardRequestId: id,
+      userId: userId,
+      comment: "[SYSTEM COMMENT] Request status changed to: " + status,
+    });
+
+    return c.json({ success: true });
+  } catch (error) {
+    return c.json({ error: "Failed to save comment" }, 500);
+  }
+});
+
 rewardRequestsRoute.delete("/:id", async (c) => {
   const db = c.get("DB");
   const bucket = c.env.R2_BUCKET;

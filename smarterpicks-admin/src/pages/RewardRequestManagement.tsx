@@ -136,21 +136,20 @@ const RewardRequestManagement: React.FC = () => {
     }
   };
 
-  const handleApprove = async (id: number) => {
-    try {
-      await axios.patch(`${API_BASE_URL}/reward-requests/${id}/approve`);
-      fetchRequests();
-    } catch (error) {
-      console.error("Error approving request:", error);
-    }
-  };
+  const changeRequestStatus = async (id: number, status: string) => {
+    console.log(user);
+    
+    if (!user?.id) return; // Ensure user is logged in
 
-  const handleReject = async (id: number) => {
     try {
-      await axios.patch(`${API_BASE_URL}/reward-requests/${id}/reject`);
+      await axios.put(`${API_BASE_URL}/reward-requests/${id}/status`, {
+        userId: user?.id,
+        status: status
+      });
       fetchRequests();
+      fetchComments(id);
     } catch (error) {
-      console.error("Error rejecting request:", error);
+      console.error("Error changing request status:", error);
     }
   };
 
@@ -263,8 +262,10 @@ const RewardRequestManagement: React.FC = () => {
                       <button onClick={() => handleAddComment(request.id)}>Add Comment</button>
 
                       <div className="actions">
-                        <button onClick={() => handleApprove(request.id)}>Approve</button>
-                        <button onClick={() => handleReject(request.id)}>Reject</button>
+                        <button onClick={() => changeRequestStatus(request.id, "Approved")} 
+                          disabled={(request.status=="Approved")? true: false }>Approve</button>
+                        <button onClick={() => changeRequestStatus(request.id, "Rejected")}
+                          disabled={(request.status=="Rejected")? true: false }>Reject</button>
                       </div>
                     </div>
                   </td>
