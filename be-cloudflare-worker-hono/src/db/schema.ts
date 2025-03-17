@@ -4,7 +4,7 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  createdAt: integer("created_at").default(Date.now()),
+  createdAt: integer("created_at").notNull(),
 });
 
 export const products = sqliteTable("products", {
@@ -29,8 +29,8 @@ export const rewardRequests = sqliteTable("reward_requests", {
   reviewLink: text("review_link"),
   proofOfPayment: text("proof_of_payment"),
   comments: text("comments"),
-  createdAt: integer("created_at").default(Date.now()),
-  updatedAt: integer("updated_at").default(Date.now()).$onUpdateFn(() => Date.now()),
+  createdAt: integer("created_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
 });
 
 export const rewardComments = sqliteTable("reward_comments", {
@@ -38,5 +38,5 @@ export const rewardComments = sqliteTable("reward_comments", {
   rewardRequestId: integer("reward_request_id").notNull().references(() => rewardRequests.id),
   userId: text("user_id").notNull().references(() => users.id),
   comment: text("comment").notNull(),
-  createdAt: integer("created_at").default(Date.now()),
+  createdAt: integer("created_at").notNull(),
 });

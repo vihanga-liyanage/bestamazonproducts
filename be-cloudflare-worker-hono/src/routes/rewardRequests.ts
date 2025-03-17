@@ -145,6 +145,8 @@ rewardRequestsRoute.post("/", async (c) => {
     userId,
     productId: Number(productId),
     orderScreenshot: orderScreenshotUrl || "", // Ensure a string value
+    createdAt: Date.now(),
+    updatedAt: Date.now()
   });
 
   return c.json({ success: true, orderScreenshotUrl });
@@ -182,6 +184,7 @@ rewardRequestsRoute.put("/:id", async (c) => {
       reviewLink: reviewLink ?? (existingRequest[0].reviewLink || ""),
       proofOfPayment: proofOfPaymentUrl ?? (existingRequest[0].proofOfPayment || ""),
       comments: comments ?? (existingRequest[0].comments || ""),
+      updatedAt: Date.now()
     })
     .where(eq(rewardRequests.id, id));
 
@@ -212,6 +215,7 @@ rewardRequestsRoute.put("/:id/status", async (c) => {
     await db.update(rewardRequests)
       .set({
         status: status,
+        updatedAt: Date.now()
       })
       .where(eq(rewardRequests.id, id));
 
@@ -221,6 +225,7 @@ rewardRequestsRoute.put("/:id/status", async (c) => {
       rewardRequestId: id,
       userId: userId,
       comment: "[SYSTEM COMMENT] Request status changed to: " + status,
+      createdAt: Date.now()
     });
 
     return c.json({ success: true });
@@ -316,6 +321,7 @@ rewardRequestsRoute.post("/:id/comments", async (c) => {
           rewardRequestId: id,
           userId: userId,
           comment,
+          createdAt: Date.now()
       });
 
       return c.json({ success: true });

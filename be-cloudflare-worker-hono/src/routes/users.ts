@@ -56,7 +56,7 @@ usersRoute.post("/", async (c) => {
   }
 
   // Insert new user
-  await db.insert(users).values({ id, name, email });
+  await db.insert(users).values({ id, name, email, createdAt: Date.now() });
 
   return c.json({ success: true });
 });
