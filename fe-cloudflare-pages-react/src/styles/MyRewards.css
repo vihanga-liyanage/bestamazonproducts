@@ -63,9 +63,11 @@
 }
 
 .status.pending-verification { color: orange; }
+.status.approved-review-pending { color: purple; }
 .status.review-submitted { color: blue; }
-.status.pending-payment { color: green; }
-.status.payment-complete { color: darkgreen; }
+.status.payment-pending { color: green; }
+.status.payment-completed { color: darkgreen; }
+.status.rejected { color: red; }
 
 .request-details {
   display: none;

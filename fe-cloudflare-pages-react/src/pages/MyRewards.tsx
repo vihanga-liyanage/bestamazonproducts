@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../styles/MyRewards.css";
 import RewardRequestModal from "../components/RewardRequestModal";
 import RewardRequestCard from "../components/RewardRequestCard";
-import { RewardRequest } from "../types/RewardRequest";
+import { RewardRequest, RewardRequestStatus } from "../types/RewardRequest";
 import useProducts from "../hooks/useProducts";
 import { useUser } from "@clerk/clerk-react";
 import { syncUser } from "../utils/authUtils";
@@ -109,14 +109,31 @@ const MyRewards: React.FC = () => {
       });
   
       if (response.ok) {
-        fetchRewardRequests();
+        changeRequestStatus(rewardRequestId, RewardRequestStatus.ReviewSubmitted);
       } else {
         console.error(`Failed to update review.`, await response.text());
       }
   
-      console.log("Review link updated successfully");
     } catch (error) {
       console.error("Error updating review link:", error);
+    }
+  };
+
+  const changeRequestStatus = async (rewardRequestId: number, status: RewardRequestStatus) => {    
+    if (!user?.id) return; // Ensure user is logged in
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ userId: user.id, status }),
+      });
+      if (response.ok) {
+        fetchRewardRequests();
+      } else {
+        console.error(`Failed to update request status.`, await response.text());
+      }
+    } catch (error) {
+      console.error("Error changing request status:", error);
     }
   };
 

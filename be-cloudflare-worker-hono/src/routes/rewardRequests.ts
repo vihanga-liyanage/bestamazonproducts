@@ -3,6 +3,7 @@ import { connectDB } from "../db/db";
 import { products, rewardComments, rewardRequests, users } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { RewardRequestStatus } from "../types/rewardRequests";
 
 type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket; R2_BUCKET_URL: string; };
 type Variables = { DB: ReturnType<typeof connectDB> };
@@ -205,6 +206,10 @@ rewardRequestsRoute.put("/:id/status", async (c) => {
 
   if (!userId) {
     return c.json({ error: "Invalid data" }, 400);
+  }
+  // Ensure the status is a valid RewardStatus value
+  if (!Object.values(RewardRequestStatus).includes(status as RewardRequestStatus)) {
+    return c.json({ error: "Invalid status value" }, 400);
   }
 
   // Check if the reward request exists

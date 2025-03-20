@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { RewardRequest } from "../types/RewardRequest";
+import { RewardRequest, RewardRequestStatus } from "../types/RewardRequest";
 import { FaTrash } from "react-icons/fa";
+import { formatTimeAgo } from "../utils/generalUtils";
 
 interface RewardRequestCardProps {
   request: RewardRequest;
@@ -19,23 +20,6 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
   const [reviewLink, setReviewLink] = useState(request.reviewLink || "");
   const [reviewScreenshot, setReviewScreenshot] = useState<File | null>(null);
 
-  // Helper function to format timestamps
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} hours ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-
-    return date.toLocaleString();
-  };
-
   const handleReviewUpdateInternal = () => {
     if (reviewScreenshot && reviewLink != "") {
       handleReviewUpdate(request.id, reviewLink, reviewScreenshot); 
@@ -53,7 +37,11 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
         )}
         <div className="request-info">
           <h3>{request.product?.title ?? "Unknown Product"}</h3>
-          <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
+          <p>Status: 
+            <span className={`status ${request.status.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z-]/g, "")}`}>
+              {request.status}
+            </span>
+          </p>
           <small>Created: {formatTimeAgo(request.createdAt)}</small>
         </div>
 
@@ -82,21 +70,25 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
                     <br></br>
                     <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
                   </>
-                ) : (
-                  <div className="review-input">
-                    <p>Please upload the review screenshot and update the URL</p>
-                    <input type="file" accept="image/*" 
-                      onChange={(e) => e.target.files && e.target.files[0] && setReviewScreenshot(e.target.files[0])} />
-                    <br /><br />
-                    <input
-                      type="url"
-                      placeholder="Enter review link"
-                      value={reviewLink}
-                      onChange={(e) => setReviewLink(e.target.value)}
-                    />
-                    <br /><br />
-                    <button onClick={() => { handleReviewUpdateInternal() }}>Update</button>
-                  </div>
+                ) : ( 
+                  (request.status == RewardRequestStatus.ApprovedReviewPending) ? (
+                    <div className="review-input">
+                      <p>Please upload the review screenshot and update the URL</p>
+                      <input type="file" accept="image/*" 
+                        onChange={(e) => e.target.files && e.target.files[0] && setReviewScreenshot(e.target.files[0])} />
+                      <br /><br />
+                      <input
+                        type="url"
+                        placeholder="Enter review link"
+                        value={reviewLink}
+                        onChange={(e) => setReviewLink(e.target.value)}
+                      />
+                      <br /><br />
+                      <button onClick={() => { handleReviewUpdateInternal() }}>Update</button>
+                    </div>
+                  ) : (
+                    <small>Please wait until we approve your request.</small>
+                  )
                 )}
               </td>
               <td>

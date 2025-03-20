@@ -2,38 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/RewardRequestManagement.css";
 import { useUser } from "@clerk/clerk-react";
+import { RewardComment, RewardRequest, RewardRequestStatus, statusTransitions } from "../types/rewardRequests";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-interface RewardRequest {
-  id: number;
-  userId: string;
-  userName: string;
-  status: string;
-  orderScreenshot: string;
-  reviewScreenshot?: string | null;
-  reviewLink?: string | null;
-  proofOfPayment?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  comments: Comment[];
-  isLoadingComments?: boolean;
-  product: {
-    id: number;
-    title: string;
-    price: number;
-    image_url: string;
-    affiliate_url: string;
-  };
-}
-
-interface Comment {
-  id: number;
-  userId: string;
-  userName: string;
-  comment: string;
-  createdAt: string;
-}
 
 const RewardRequestManagement: React.FC = () => {
   const { user } = useUser();
@@ -63,6 +34,10 @@ const RewardRequestManagement: React.FC = () => {
     }
   };
 
+  const getNextStatuses = (currentStatus: RewardRequestStatus): RewardRequestStatus[] => {
+    return statusTransitions[currentStatus] || [];
+  };
+  
   const fetchComments = async (requestId: number) => {
     setRequests((prev) =>
       prev.map((req) =>
@@ -73,7 +48,7 @@ const RewardRequestManagement: React.FC = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/reward-requests/${requestId}/comments`);
       const sortedComments = response.data.sort(
-        (a: Comment, b: Comment) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        (a: RewardComment, b: RewardComment) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       ); 
   
       setRequests((prev) =>
@@ -136,7 +111,7 @@ const RewardRequestManagement: React.FC = () => {
     }
   };
 
-  const changeRequestStatus = async (id: number, status: string) => {
+  const changeRequestStatus = async (id: number, status: RewardRequestStatus) => {
     console.log(user);
     
     if (!user?.id) return; // Ensure user is logged in
@@ -262,10 +237,11 @@ const RewardRequestManagement: React.FC = () => {
                       <button onClick={() => handleAddComment(request.id)}>Add Comment</button>
 
                       <div className="actions">
-                        <button onClick={() => changeRequestStatus(request.id, "Approved")} 
-                          disabled={(request.status=="Approved")? true: false }>Approve</button>
-                        <button onClick={() => changeRequestStatus(request.id, "Rejected")}
-                          disabled={(request.status=="Rejected")? true: false }>Reject</button>
+                        { getNextStatuses(request.status).map((nextStatus) => (
+                          <button key={nextStatus} onClick={() => changeRequestStatus(request.id, nextStatus)}>
+                            {nextStatus}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </td>
