@@ -183,3 +183,42 @@
 input {
   font-family: inherit;
 }
+
+.image-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.image-table th, .image-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.image-table img {
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .image-table tbody,
+  .image-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .image-table td {
+    display: block;
+    text-align: center;
+  }
+
+  .image-table td::before {
+    content: attr(data-label); /* Add labels for accessibility */
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+}

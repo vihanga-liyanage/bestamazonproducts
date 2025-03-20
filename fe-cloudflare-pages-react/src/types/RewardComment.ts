@@ -3,6 +3,6 @@ export interface RewardComment {
   rewardRequestId: string;
   userId: string;
   comment: string;
-  createdAt: number;
+  createdAt: string;
   userName: string;
 }

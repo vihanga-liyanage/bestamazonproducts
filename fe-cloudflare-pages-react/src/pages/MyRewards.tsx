@@ -6,6 +6,7 @@ import { RewardRequest } from "../types/RewardRequest";
 import useProducts from "../hooks/useProducts";
 import { useUser } from "@clerk/clerk-react";
 import { syncUser } from "../utils/authUtils";
+import { RewardComment } from "../types/RewardComment";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -140,8 +141,13 @@ const MyRewards: React.FC = () => {
   const fetchComments = async (rewardRequestId: number) => {
     try {
       const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}/comments`);
+       
       if (response.ok) {
-        return await response.json();
+        const comments = await response.json();
+        const sortedComments = comments.sort(
+          (a: RewardComment, b: RewardComment) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        return sortedComments;
       }
       return []; // Ensure it returns an empty array if no comments are found
     } catch (error) {
