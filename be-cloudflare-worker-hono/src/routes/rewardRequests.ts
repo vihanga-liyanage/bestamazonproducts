@@ -156,39 +156,45 @@ rewardRequestsRoute.post("/", async (c) => {
 rewardRequestsRoute.put("/:id", async (c) => {
   const id = Number(c.req.param("id"));
   const formData = await c.req.formData();
-  const status = formData.get("status") as string;
+  const db = c.get("DB");
+  const bucket = c.env.R2_BUCKET;
+
+  // Extract values from form data
+  const status = formData.get("status") as string | null;
   const reviewScreenshot = formData.get("reviewScreenshot") as File | null;
   const reviewLink = formData.get("reviewLink") as string | null;
   const proofOfPayment = formData.get("proofOfPayment") as File | null;
   const comments = formData.get("comments") as string | null;
-  const db = c.get("DB");
-  const bucket = c.env.R2_BUCKET;
 
   // Check if the reward request exists
   const existingRequest = await db.select().from(rewardRequests).where(eq(rewardRequests.id, id)).limit(1);
-  
   if (existingRequest.length === 0) {
     return c.json({ error: "Reward request not found" }, 404);
   }
 
+  let updateData: Record<string, any> = { updatedAt: Date.now() };
+
+  // Update status if provided
+  if (status) updateData.status = status;
+
+  // Update review link if provided
+  if (reviewLink !== null) updateData.reviewLink = reviewLink;
+
   // Upload images if provided
-  const reviewScreenshotUrl = await uploadImageToR2(bucket, reviewScreenshot, c.env.R2_BUCKET_URL);
-  const proofOfPaymentUrl = await uploadImageToR2(bucket, proofOfPayment, c.env.R2_BUCKET_URL);
+  if (reviewScreenshot) {
+    updateData.reviewScreenshot = await uploadImageToR2(bucket, reviewScreenshot, c.env.R2_BUCKET_URL);
+  }
+  if (proofOfPayment) {
+    updateData.proofOfPayment = await uploadImageToR2(bucket, proofOfPayment, c.env.R2_BUCKET_URL);
+  }
+
+  // Update comments if provided
+  if (comments !== null) updateData.comments = comments;
 
   // Update the reward request in the database
-  await db
-    .update(rewardRequests)
-    .set({
-      status: status ?? existingRequest[0].status,
-      reviewScreenshot: reviewScreenshotUrl ?? (existingRequest[0].reviewScreenshot || ""),
-      reviewLink: reviewLink ?? (existingRequest[0].reviewLink || ""),
-      proofOfPayment: proofOfPaymentUrl ?? (existingRequest[0].proofOfPayment || ""),
-      comments: comments ?? (existingRequest[0].comments || ""),
-      updatedAt: Date.now()
-    })
-    .where(eq(rewardRequests.id, id));
+  await db.update(rewardRequests).set(updateData).where(eq(rewardRequests.id, id));
 
-  return c.json({ success: true, reviewScreenshotUrl, proofOfPaymentUrl });
+  return c.json({ success: true, updatedFields: updateData });
 });
 
 // Update the status of a reward request
