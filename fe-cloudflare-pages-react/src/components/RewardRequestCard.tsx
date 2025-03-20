@@ -54,6 +54,7 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
         <div className="request-info">
           <h3>{request.product?.title ?? "Unknown Product"}</h3>
           <p>Status: <span className={`status ${request.status.replace(" ", "-").toLowerCase()}`}>{request.status}</span></p>
+          <small>Created: {formatTimeAgo(request.createdAt)}</small>
         </div>
 
         <button className="delete-btn" onClick={() => handleDeleteRequest(request.id)} title="Delete Request">

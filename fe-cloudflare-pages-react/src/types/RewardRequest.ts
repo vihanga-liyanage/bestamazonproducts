@@ -11,4 +11,5 @@ export interface RewardRequest {
   reviewLink?: string;
   proofOfPayment?: string;
   comments: RewardComment[];
+  createdAt: string;
 }
