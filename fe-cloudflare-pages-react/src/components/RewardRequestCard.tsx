@@ -4,18 +4,20 @@ import { FaTrash } from "react-icons/fa";
 
 interface RewardRequestCardProps {
   request: RewardRequest;
-  handleImageUpload: (rewardRequestId: number, imageFile: File, imageType: string) => void;
   handleAddComment: (rewardRequestId: number, comment: string) => void;
   handleDeleteRequest: (rewardRequestId: number) => void;
+  handleReviewUpdate: (rewardRequestId: number, reviewLink: string, imageFile: File) => void;
 }
 
 const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
   request,
-  handleImageUpload,
   handleAddComment,
   handleDeleteRequest,
+  handleReviewUpdate,
 }) => {
   const [commentInput, setCommentInput] = useState("");
+  const [reviewLink, setReviewLink] = useState(request.reviewLink || "");
+  const [reviewScreenshot, setReviewScreenshot] = useState<File | null>(null);
 
   // Helper function to format timestamps
   const formatTimeAgo = (dateString: string) => {
@@ -30,10 +32,17 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
     if (diffInHours < 24) return `${diffInHours} hours ago`;
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays} days ago`;
-    
-    return date.toLocaleString(); // Use default locale format for older comments
+
+    return date.toLocaleString();
   };
-  
+
+  const handleReviewUpdateInternal = () => {
+    if (reviewScreenshot && reviewLink != "") {
+      handleReviewUpdate(request.id, reviewLink, reviewScreenshot); 
+      setReviewLink("");
+      setReviewScreenshot(null);
+    }
+  }
   return (
     <div className="request-card">
       <div className="request-summary" onClick={(e) => e.currentTarget.nextElementSibling?.classList.toggle("expanded")}>
@@ -53,7 +62,6 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
       </div>
 
       <div className="request-details">
-        
         <table className="image-table">
           <tbody>
             <tr>
@@ -62,7 +70,7 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
                 {request.orderScreenshot ? (
                   <img src={request.orderScreenshot} alt="Order Screenshot" />
                 ) : (
-                  <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "orderScreenshot")} />
+                  <small>Unabel to find the order screen shot</small>
                 )}
               </td>
               <td>
@@ -70,21 +78,33 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
                 {request.reviewScreenshot ? (
                   <>
                     <img src={request.reviewScreenshot} alt="Review Screenshot" />
+                    <br></br>
                     <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
                   </>
                 ) : (
-                  <>
-                    <small>Please upload the review screen shot and update the URL</small>
-                    <br></br>
-                    <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(request.id, e.target.files[0], "reviewScreenshot")} />
-                  </>
+                  <div className="review-input">
+                    <p>Please upload the review screenshot and update the URL</p>
+                    <input type="file" accept="image/*" 
+                      onChange={(e) => e.target.files && e.target.files[0] && setReviewScreenshot(e.target.files[0])} />
+                    <br /><br />
+                    <input
+                      type="url"
+                      placeholder="Enter review link"
+                      value={reviewLink}
+                      onChange={(e) => setReviewLink(e.target.value)}
+                    />
+                    <br /><br />
+                    <button onClick={() => { handleReviewUpdateInternal() }}>Update</button>
+                  </div>
                 )}
               </td>
               <td>
                 <p>Proof of Payment</p>
                 {request.proofOfPayment ? (
                   <img src={request.proofOfPayment} alt="Proof of Payment" />
-                ): (<small>Waiting for the payment.</small>)}
+                ) : (
+                  <small>Waiting for the payment.</small>
+                )}
               </td>
             </tr>
           </tbody>

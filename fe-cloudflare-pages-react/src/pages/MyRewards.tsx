@@ -94,27 +94,29 @@ const MyRewards: React.FC = () => {
       console.error("Error deleting reward request:", error);
     }
   };
+
+  const handleReviewUpdate = async (rewardRequestId: number, reviewLink: string, imageFile: File) => {
+    if (!reviewLink.trim() || imageFile == null) return; // Prevent empty values
   
-  const handleImageUpload = async (rewardRequestId: number, imageFile: File, imageType: string) => {
-    if (!user || !imageFile) return;
-
-    const formData = new FormData();
-    formData.append("id", String(rewardRequestId));
-    formData.append(imageType, imageFile);
-
     try {
+      const formData = new FormData();
+      formData.append("reviewLink", reviewLink);
+      formData.append("reviewScreenshot", imageFile);
+  
       const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
         method: "PUT",
         body: formData,
       });
-
+  
       if (response.ok) {
         fetchRewardRequests();
       } else {
-        console.error(`Error uploading ${imageType}:`, await response.text());
+        console.error(`Failed to update review.`, await response.text());
       }
+  
+      console.log("Review link updated successfully");
     } catch (error) {
-      console.error(`Error submitting ${imageType}:`, error);
+      console.error("Error updating review link:", error);
     }
   };
 
@@ -181,9 +183,9 @@ const MyRewards: React.FC = () => {
                 <RewardRequestCard
                   key={request.id}
                   request={request}
-                  handleImageUpload={handleImageUpload}
                   handleAddComment={handleAddComment}
                   handleDeleteRequest={handleDeleteRequest}
+                  handleReviewUpdate={handleReviewUpdate}
                 />
               ))
             ) : (

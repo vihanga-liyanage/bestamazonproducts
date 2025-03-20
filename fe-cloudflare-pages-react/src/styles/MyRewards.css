@@ -134,6 +134,25 @@
   color: gray;
 }
 
+.review-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  width: 30vw;
+}
+
+.review-input button {
+  padding: 10px 15px;
+  background-color: #ff9900;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
 .comment-input {
   display: flex;
   align-items: center;
