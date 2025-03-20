@@ -4,6 +4,7 @@ import { products, rewardComments, rewardRequests, users } from "../db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { RewardRequestStatus } from "../types/rewardRequests";
+import { generateStatusChangeComment } from "../utils/utils";
 
 type Bindings = { DB: D1Database; R2_BUCKET: R2Bucket; R2_BUCKET_URL: string; };
 type Variables = { DB: ReturnType<typeof connectDB> };
@@ -230,14 +231,20 @@ rewardRequestsRoute.put("/:id/status", async (c) => {
       })
       .where(eq(rewardRequests.id, id));
 
-    // Add a comment to specify the status change
-    await db.insert(rewardComments).values({
-      id: crypto.randomUUID(),
-      rewardRequestId: id,
-      userId: userId,
-      comment: "[SYSTEM COMMENT] Request status changed to: " + status,
-      createdAt: Date.now()
-    });
+    // Get user name for the comment
+    const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (result.length === 0) {
+      console.error("User not found with the ID: " + userId);
+    } else {
+      // Add a comment to specify the status change
+      await db.insert(rewardComments).values({
+        id: crypto.randomUUID(),
+        rewardRequestId: id,
+        userId: "SYSTEM",
+        comment: generateStatusChangeComment(existingRequest[0].status, status, result[0].name),
+        createdAt: Date.now()
+      });
+    }
 
     return c.json({ success: true });
   } catch (error) {
