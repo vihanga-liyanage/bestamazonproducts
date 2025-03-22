@@ -14,6 +14,7 @@ const RewardRequestManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [newComment, setNewComment] = useState<{ [key: number]: string }>({});
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
 
   useEffect(() => {
     fetchRequests();
@@ -37,6 +38,19 @@ const RewardRequestManagement: React.FC = () => {
   const getNextStatuses = (currentStatus: RewardRequestStatus): RewardRequestStatus[] => {
     return statusTransitions[currentStatus] || [];
   };
+
+  const getStatusButtonText = (status: RewardRequestStatus): string => {
+    switch (status) {
+      case RewardRequestStatus.Rejected:
+        return "Reject";
+      case RewardRequestStatus.ApprovedReviewPending:
+        return "Approve for Review";
+      case RewardRequestStatus.PaymentPending:
+        return "Approve Review";
+      default:
+        return status;
+    }
+  }
   
   const fetchComments = async (requestId: number) => {
     setRequests((prev) =>
@@ -108,6 +122,29 @@ const RewardRequestManagement: React.FC = () => {
       setNewComment((prev) => ({ ...prev, [requestId]: "" }));
     } catch (error) {
       console.error(`Error adding comment to request ${requestId}:`, error);
+    }
+  };
+
+  const handleAddPaymentProof = async (rewardRequestId: number, paymentProofFile: File|null) => {
+    if (paymentProofFile == null) return; // Prevent empty values
+  
+    try {
+      const formData = new FormData();
+      formData.append("proofOfPayment", paymentProofFile);
+  
+      const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
+        method: "PUT",
+        body: formData,
+      });
+  
+      if (response.ok) {
+        changeRequestStatus(rewardRequestId, RewardRequestStatus.PaymentCompleted);
+      } else {
+        console.error(`Failed to upload payment proof.`, await response.text());
+      }
+  
+    } catch (error) {
+      console.error("Error uploading payment proof:", error);
     }
   };
 
@@ -187,65 +224,93 @@ const RewardRequestManagement: React.FC = () => {
                 </td>
               </tr>
               {expandedRequest === request.id && (
-                <tr>
-                  <td colSpan={5}>
-                    <div className="expanded-view">
-                      <h4>Details</h4>
-                      <img src={request.orderScreenshot} alt="Order Proof" width="150" />
+                <>
+                  <tr>
+                    <td colSpan={5}>
+                      <table className="request-details-table">
+                        <tr>
+                          <td>
+                            < h4>Order Screenshot</h4>
+                            <img src={request.orderScreenshot} alt="Order Proof" width="150" />
+                          </td>
+                          <td>
+                            {request.reviewScreenshot && (
+                              <>
+                                <h4>Review Screenshot</h4>
+                                <img src={request.reviewScreenshot} alt="Review Proof" width="150" />
+                              </>
+                            )}
+                            {request.reviewLink && (
+                              <p>
+                                <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
+                              </p>
+                            )}
+                          </td>
+                          <td>
+                            <h4>Payment</h4>
+                            {
+                              request.proofOfPayment && (
+                                <img src={request.proofOfPayment} alt="Review Proof" width="150" />
+                              )
+                            }
+                            {
+                              (request.status == RewardRequestStatus.PaymentPending) && (
+                                <div className="review-input">
+                                  <p>Please upload the payment proof.</p>
+                                  <input type="file" accept="image/*" 
+                                    onChange={(e) => e.target.files && e.target.files[0] && setPaymentProof(e.target.files[0])} />
+                                  <br /><br />
+                                  <button onClick={() => { handleAddPaymentProof(request.id, paymentProof) }}>Update</button>
+                                </div>
+                              )
+                            }                            
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colSpan={5}>
+                            <div className="expanded-view">
+                              <h4>Comments</h4>
+                              {request.isLoadingComments ? (
+                                <p>Loading comments...</p>
+                              ) : (
+                                <ul>
+                                  {request.comments.length ? (
+                                    request.comments.map((comment) => (
+                                      <li key={comment.id}>
+                                        <strong>{comment.userName}:</strong> {comment.comment}
+                                        <br />
+                                        <small>{formatTimeAgo(comment.createdAt)}</small>
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <p>No comments yet.</p>
+                                  )}
+                                </ul>
+                              )}
 
-                      {request.reviewScreenshot && (
-                        <>
-                          <h4>Review Screenshot</h4>
-                          <img src={request.reviewScreenshot} alt="Review Proof" width="150" />
-                        </>
-                      )}
+                              <textarea
+                                placeholder="Add a comment"
+                                value={newComment[request.id] || ""}
+                                onChange={(e) =>
+                                  setNewComment((prev) => ({ ...prev, [request.id]: e.target.value }))
+                                }
+                              ></textarea>
+                              <button onClick={() => handleAddComment(request.id)}>Add Comment</button>
 
-                      {request.reviewLink && (
-                        <p>
-                          <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">
-                            View Review
-                          </a>
-                        </p>
-                      )}
-
-                      <h4>Comments</h4>
-                      {request.isLoadingComments ? (
-                        <p>Loading comments...</p>
-                      ) : (
-                        <ul>
-                          {request.comments.length ? (
-                            request.comments.map((comment) => (
-                              <li key={comment.id}>
-                                <strong>{comment.userName}:</strong> {comment.comment}
-                                <br />
-                                <small>{formatTimeAgo(comment.createdAt)}</small>
-                              </li>
-                            ))
-                          ) : (
-                            <p>No comments yet.</p>
-                          )}
-                        </ul>
-                      )}
-
-                      <textarea
-                        placeholder="Add a comment"
-                        value={newComment[request.id] || ""}
-                        onChange={(e) =>
-                          setNewComment((prev) => ({ ...prev, [request.id]: e.target.value }))
-                        }
-                      ></textarea>
-                      <button onClick={() => handleAddComment(request.id)}>Add Comment</button>
-
-                      <div className="actions">
-                        { getNextStatuses(request.status).map((nextStatus) => (
-                          <button key={nextStatus} onClick={() => changeRequestStatus(request.id, nextStatus)}>
-                            {nextStatus}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+                              <div className="actions">
+                                { getNextStatuses(request.status).map((nextStatus) => (
+                                  <button key={nextStatus} onClick={() => changeRequestStatus(request.id, nextStatus)}>
+                                    {getStatusButtonText(nextStatus)}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </>
               )}
             </React.Fragment>
           ))}

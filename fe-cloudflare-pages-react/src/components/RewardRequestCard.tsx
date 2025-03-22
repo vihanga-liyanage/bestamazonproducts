@@ -27,11 +27,14 @@ const RewardRequestCard: React.FC<RewardRequestCardProps> = ({
       setReviewScreenshot(null);
     }
   }
+  
   return (
     <div className="request-card">
       <div className="request-summary" onClick={(e) => e.currentTarget.nextElementSibling?.classList.toggle("expanded")}>
         {request.product?.image_url ? (
-          <img src={request.product.image_url} alt={request.product.title} />
+          <div className="image-box">
+            <img src={request.product.image_url} alt={request.product.title} />
+          </div>
         ) : (
           <p>No Image Available</p>
         )}

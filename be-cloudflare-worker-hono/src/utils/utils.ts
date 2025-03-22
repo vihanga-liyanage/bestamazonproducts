@@ -16,9 +16,11 @@ export const generateStatusChangeComment = (
     [`${RewardRequestStatus.PendingVerification}->${RewardRequestStatus.Rejected}`]: 
       `Request has been rejected by ${userName}.`,
 
-    // Step 2: After Approval (Can only be rejected)
+    // Step 2: After Approval 
     [`${RewardRequestStatus.ApprovedReviewPending}->${RewardRequestStatus.Rejected}`]: 
       `Request was rejected by ${userName}.`,
+    [`${RewardRequestStatus.ApprovedReviewPending}->${RewardRequestStatus.ReviewSubmitted}`]: 
+      `Amazon review submitted by ${userName}.`,
 
     // Step 3: Review Submission Processing
     [`${RewardRequestStatus.ReviewSubmitted}->${RewardRequestStatus.PaymentPending}`]: 

@@ -21,6 +21,10 @@
   margin-top: 10px;
 }
 
+.request-details-table {
+  width: 100%;
+}
+
 .requests-table th, .requests-table td {
   border: 1px solid #ddd;
   padding: 10px;
