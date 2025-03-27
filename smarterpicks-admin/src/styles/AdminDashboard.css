@@ -23,6 +23,23 @@ body {
   height: 100vh; /* Ensure sidebar takes full height */
 }
 
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .admin-container {
+    flex-direction: column; /* Stack sidebar and content vertically */
+  }
+
+  .sidebar {
+    width: 100%; /* Make sidebar full width */
+    height: auto; /* Allow sidebar to adjust height based on content */
+    overflow-x: auto; /* Enable horizontal scrolling for long menus if needed */
+  }
+
+  .admin-content {
+    padding: 10px; /* Reduce padding for smaller screens */
+  }
+}
+
 .sidebar h2 {
   text-align: center;
 }

@@ -85,3 +85,32 @@
 button {
   font-family: inherit;
 }
+
+@media (max-width: 768px) {
+  .reward-requests-container {
+    padding: 10px;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .controls input, .controls select {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .requests-table th, .requests-table td, .request-details-table th, .request-details-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .expanded-view {
+    padding: 10px;
+  }
+
+  .expanded-view .actions button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

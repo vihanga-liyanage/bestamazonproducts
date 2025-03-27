@@ -15,6 +15,7 @@ const RewardRequestManagement: React.FC = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [newComment, setNewComment] = useState<{ [key: number]: string }>({});
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRequests();
@@ -35,6 +36,14 @@ const RewardRequestManagement: React.FC = () => {
     }
   };
 
+  const handleImageClick = (imageUrl: string) => {
+    setEnlargedImage(imageUrl);
+  };
+
+  const handleCloseModal = () => {
+    setEnlargedImage(null);
+  };
+
   const getNextStatuses = (currentStatus: RewardRequestStatus): RewardRequestStatus[] => {
     return statusTransitions[currentStatus] || [];
   };
@@ -51,20 +60,20 @@ const RewardRequestManagement: React.FC = () => {
         return status;
     }
   }
-  
+
   const fetchComments = async (requestId: number) => {
     setRequests((prev) =>
       prev.map((req) =>
         req.id === requestId ? { ...req, isLoadingComments: true } : req
       )
     );
-  
+
     try {
       const response = await axios.get(`${API_BASE_URL}/reward-requests/${requestId}/comments`);
       const sortedComments = response.data.sort(
         (a: RewardComment, b: RewardComment) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      ); 
-  
+      );
+
       setRequests((prev) =>
         prev.map((req) =>
           req.id === requestId
@@ -93,7 +102,7 @@ const RewardRequestManagement: React.FC = () => {
     if (diffInHours < 24) return `${diffInHours} hours ago`;
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays} days ago`;
-    
+
     return date.toLocaleString(); // Use default locale format for older comments
   };
 
@@ -125,24 +134,24 @@ const RewardRequestManagement: React.FC = () => {
     }
   };
 
-  const handleAddPaymentProof = async (rewardRequestId: number, paymentProofFile: File|null) => {
+  const handleAddPaymentProof = async (rewardRequestId: number, paymentProofFile: File | null) => {
     if (paymentProofFile == null) return; // Prevent empty values
-  
+
     try {
       const formData = new FormData();
       formData.append("proofOfPayment", paymentProofFile);
-  
+
       const response = await fetch(`${API_BASE_URL}/reward-requests/${rewardRequestId}`, {
         method: "PUT",
         body: formData,
       });
-  
+
       if (response.ok) {
         changeRequestStatus(rewardRequestId, RewardRequestStatus.PaymentCompleted);
       } else {
         console.error(`Failed to upload payment proof.`, await response.text());
       }
-  
+
     } catch (error) {
       console.error("Error uploading payment proof:", error);
     }
@@ -150,7 +159,7 @@ const RewardRequestManagement: React.FC = () => {
 
   const changeRequestStatus = async (id: number, status: RewardRequestStatus) => {
     console.log(user);
-    
+
     if (!user?.id) return; // Ensure user is logged in
 
     try {
@@ -230,14 +239,26 @@ const RewardRequestManagement: React.FC = () => {
                       <table className="request-details-table">
                         <tr>
                           <td>
-                            < h4>Order Screenshot</h4>
-                            <img src={request.orderScreenshot} alt="Order Proof" width="150" />
+                            <h4>Order Screenshot</h4>
+                            <img
+                              src={request.orderScreenshot}
+                              alt="Order Proof"
+                              width="150"
+                              onClick={() => request.orderScreenshot && handleImageClick(request.orderScreenshot)}
+                              style={{ cursor: 'pointer' }}
+                            />
                           </td>
                           <td>
                             {request.reviewScreenshot && (
                               <>
                                 <h4>Review Screenshot</h4>
-                                <img src={request.reviewScreenshot} alt="Review Proof" width="150" />
+                                <img
+                                  src={request.reviewScreenshot}
+                                  alt="Review Proof"
+                                  width="150"
+                                  onClick={() => request.reviewScreenshot && handleImageClick(request.reviewScreenshot)}
+                                  style={{ cursor: 'pointer' }}
+                                />
                               </>
                             )}
                             {request.reviewLink && (
@@ -247,23 +268,35 @@ const RewardRequestManagement: React.FC = () => {
                             )}
                           </td>
                           <td>
-                            <h4>Payment</h4>
-                            {
-                              request.proofOfPayment && (
-                                <img src={request.proofOfPayment} alt="Review Proof" width="150" />
-                              )
-                            }
-                            {
-                              (request.status == RewardRequestStatus.PaymentPending) && (
-                                <div className="review-input">
-                                  <p>Please upload the payment proof.</p>
-                                  <input type="file" accept="image/*" 
-                                    onChange={(e) => e.target.files && e.target.files[0] && setPaymentProof(e.target.files[0])} />
-                                  <br /><br />
-                                  <button onClick={() => { handleAddPaymentProof(request.id, paymentProof) }}>Update</button>
-                                </div>
-                              )
-                            }                            
+                            <h4>Payment Proof</h4>
+                            {request.proofOfPayment && (
+                              <img
+                                src={request.proofOfPayment}
+                                alt="Payment Proof"
+                                width="150"
+                                onClick={() => request.proofOfPayment && handleImageClick(request.proofOfPayment)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            )}
+                            {request.status === RewardRequestStatus.PaymentPending && (
+                              <div className="review-input">
+                                <p>Please upload the payment proof.</p>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    e.target.files &&
+                                    e.target.files[0] &&
+                                    setPaymentProof(e.target.files[0])
+                                  }
+                                />
+                                <br />
+                                <br />
+                                <button onClick={() => handleAddPaymentProof(request.id, paymentProof)}>
+                                  Update
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                         <tr>
@@ -316,6 +349,22 @@ const RewardRequestManagement: React.FC = () => {
           ))}
         </tbody>
       </table>
+      {expandedRequest !== null && enlargedImage && (
+        <div className="modal" onClick={handleCloseModal} style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <img src={enlargedImage} alt="Enlarged" style={{ maxWidth: '90%', maxHeight: '90%' }} />
+        </div>
+      )}
     </div>
   );
 };

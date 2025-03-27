@@ -12,3 +12,13 @@
   color: red;
   font-weight: bold;
 }
+
+@media (max-width: 768px) {
+  .landing-container {
+    padding: 20px;
+  }
+
+  .landing-container h1 {
+    font-size: 1.5rem;
+  }
+}
