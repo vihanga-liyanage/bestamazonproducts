@@ -149,6 +149,10 @@
   background-color: #f8fafc;
 }
 
+.request-details-table {
+  width: 100%;
+}
+
 .expanded-view {
   background-color: #ffffff;
   padding: 1.5rem;
@@ -183,12 +187,11 @@
 }
 
 .expanded-view textarea {
-  width: 100%;
+  width: 90%;
   padding: 0.75rem;
   margin: 1rem 0;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  min-height: 100px;
   font-family: inherit;
 }
 
@@ -232,6 +235,13 @@ button:disabled {
   background-color: #cbd5e1;
   cursor: not-allowed;
 }
+
+.status.pending-verification { color: orange; }
+.status.approved---review-pending { color: purple; }
+.status.review-submitted { color: blue; }
+.status.payment-pending { color: green; }
+.status.payment-completed { color: darkgreen; }
+.status.rejected { color: red; }
 
 @media (max-width: 768px) {
   .admin-content {

@@ -242,7 +242,9 @@ const RewardRequestManagement: React.FC = () => {
                   >
                     {request.product.title}
                   </a>
-                  <p>{request.status}</p>
+                  <p className={`status ${request.status.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z-]/g, "")}`}>
+                    {request.status}
+                  </p>
                 </td>
                 <td>{new Date(request.createdAt).toLocaleString()}</td>
                 <td>
@@ -260,7 +262,7 @@ const RewardRequestManagement: React.FC = () => {
               {expandedRequest === request.id && (
                 <>
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <table className="request-details-table">
                         <tr>
                           <td colSpan={3}>
@@ -268,6 +270,13 @@ const RewardRequestManagement: React.FC = () => {
                               <strong>PayPal Email:</strong> {request.paypalEmail}
                             </div>
                           </td>
+                          {request.reviewLink && (
+                            <td colSpan={3}>
+                              <div className="payment-info">
+                                <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                         <tr>
                           <td>
@@ -292,11 +301,6 @@ const RewardRequestManagement: React.FC = () => {
                                   style={{ cursor: 'pointer' }}
                                 />
                               </>
-                            )}
-                            {request.reviewLink && (
-                              <p>
-                                <a href={request.reviewLink} target="_blank" rel="noopener noreferrer">View Review</a>
-                              </p>
                             )}
                           </td>
                           <td>
