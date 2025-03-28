@@ -212,8 +212,8 @@ const RewardRequestManagement: React.FC = () => {
         <thead>
           <tr>
             <th>User</th>
+            <th>Image</th>
             <th>Product</th>
-            <th>Status</th>
             <th>Submitted At</th>
             <th>Actions</th>
           </tr>
@@ -223,19 +223,44 @@ const RewardRequestManagement: React.FC = () => {
             <React.Fragment key={request.id}>
               <tr>
                 <td>{request.userName}</td>
-                <td>{request.product.title}</td>
-                <td>{request.status}</td>
-                <td>{new Date(request.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <button onClick={() => toggleExpand(request.id)}>
-                    {expandedRequest === request.id ? "Collapse" : "Expand"}
+                  <div className="image-container">
+                    {request.product.image_url && (
+                      <img 
+                        src={request.product.image_url} 
+                        alt="Product" 
+                        className="product-thumbnail"
+                      />
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <a 
+                    href={request.product.affiliate_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    {request.product.title}
+                  </a>
+                  <p>{request.status}</p>
+                </td>
+                <td>{new Date(request.createdAt).toLocaleString()}</td>
+                <td>
+                  <button
+                    onClick={() => toggleExpand(request.id)}
+                    className="expand-button"
+                  >
+                    <span className="button-text">
+                      {expandedRequest === request.id ? "Collapse" : "Expand"}
+                    </span>
+                    <span className="arrow-icon">▼</span>
                   </button>
                 </td>
               </tr>
               {expandedRequest === request.id && (
                 <>
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <table className="request-details-table">
                         <tr>
                           <td colSpan={3}>
