@@ -47,8 +47,8 @@ const MyRewards: React.FC = () => {
     }
   };  
 
-  const handleSubmitRequest = async (productId: number, orderScreenshot: File | null) => {
-    if (!orderScreenshot || !user) return;
+  const handleSubmitRequest = async (productId: number, orderScreenshot: File | null, paypalEmail: string) => {
+    if (!orderScreenshot || !user || !paypalEmail) return;
   
     const selectedProduct = products.find((p) => p.id === productId);
     if (!selectedProduct) return;
@@ -57,6 +57,7 @@ const MyRewards: React.FC = () => {
     formData.append("userId", user.id);
     formData.append("productId", String(productId));
     formData.append("orderScreenshot", orderScreenshot);
+    formData.append("paypalEmail", paypalEmail);
   
     try {
       const response = await fetch(`${API_BASE_URL}/reward-requests`, {
@@ -188,7 +189,7 @@ const MyRewards: React.FC = () => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             products={products}
-            onSubmit={(productId, orderScreenshot) => handleSubmitRequest(productId, orderScreenshot)}
+            onSubmit={(productId, orderScreenshot, paypalEmail) => handleSubmitRequest(productId, orderScreenshot, paypalEmail)}
           />
 
           {loading && <p>Loading reward products...</p>}

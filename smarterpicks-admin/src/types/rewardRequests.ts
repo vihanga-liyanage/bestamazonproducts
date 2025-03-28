@@ -3,6 +3,7 @@ export interface RewardRequest {
   userId: string;
   userName: string;
   status: RewardRequestStatus;
+  paypalEmail?: string | null;
   orderScreenshot: string;
   reviewScreenshot?: string | null;
   reviewLink?: string | null;

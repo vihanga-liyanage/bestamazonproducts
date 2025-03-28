@@ -212,7 +212,7 @@ const RewardRequestManagement: React.FC = () => {
         <thead>
           <tr>
             <th>User</th>
-            <th>Product Name</th>
+            <th>Product</th>
             <th>Status</th>
             <th>Submitted At</th>
             <th>Actions</th>
@@ -237,6 +237,13 @@ const RewardRequestManagement: React.FC = () => {
                   <tr>
                     <td colSpan={5}>
                       <table className="request-details-table">
+                        <tr>
+                          <td colSpan={3}>
+                            <div className="payment-info">
+                              <strong>PayPal Email:</strong> {request.paypalEmail}
+                            </div>
+                          </td>
+                        </tr>
                         <tr>
                           <td>
                             <h4>Order Screenshot</h4>

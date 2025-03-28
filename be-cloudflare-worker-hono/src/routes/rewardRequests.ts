@@ -80,6 +80,7 @@ rewardRequestsRoute.get("/", async (c) => {
         userId: rewardRequests.userId,
         userName: users.name,
         status: rewardRequests.status,
+        paypalEmail: rewardRequests.paypalEmail,
         orderScreenshot: rewardRequests.orderScreenshot,
         reviewScreenshot: rewardRequests.reviewScreenshot,
         reviewLink: rewardRequests.reviewLink,
@@ -121,10 +122,11 @@ rewardRequestsRoute.post("/", async (c) => {
   const userId = formData.get("userId") as string;
   const productId = formData.get("productId") as string;
   const orderScreenshot = formData.get("orderScreenshot") as File | null;
+  const paypalEmail = formData.get("paypalEmail") as string;
   const db = c.get("DB");
   const bucket = c.env.R2_BUCKET;
 
-  if (!userId || !productId || !orderScreenshot) {
+  if (!userId || !productId || !orderScreenshot || !paypalEmail) {
     return c.json({ error: "Missing required fields" }, 400);
   }
 
@@ -142,11 +144,17 @@ rewardRequestsRoute.post("/", async (c) => {
   // Upload order screenshot
   const orderScreenshotUrl = await uploadImageToR2(bucket, orderScreenshot, c.env.R2_BUCKET_URL);
 
-  // Store reward request in the database
+  // Update user's PayPal email if not set
+  await db.update(users)
+    .set({ paypalEmail })
+    .where(eq(users.id, userId));
+
+  // Create reward request
   await db.insert(rewardRequests).values({
     userId,
     productId: Number(productId),
-    orderScreenshot: orderScreenshotUrl || "", // Ensure a string value
+    orderScreenshot: orderScreenshotUrl || "",
+    paypalEmail,
     createdAt: Date.now(),
     updatedAt: Date.now()
   });

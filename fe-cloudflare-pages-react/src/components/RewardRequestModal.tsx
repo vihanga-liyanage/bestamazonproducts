@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Select from "react-select"; // Import react-select
+import { useUser } from "@clerk/clerk-react";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+import Select from "react-select";
 import "../styles/Modal.css";
 import { Product } from "../types/Product";
 
@@ -7,7 +9,7 @@ interface RewardRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
   products: Product[];
-  onSubmit: (productId: number, orderScreenshot: File | null) => void;
+  onSubmit: (productId: number, orderScreenshot: File | null, paypalEmail: string) => void;
 }
 
 const RewardRequestModal: React.FC<RewardRequestModalProps> = ({
@@ -16,16 +18,36 @@ const RewardRequestModal: React.FC<RewardRequestModalProps> = ({
   products,
   onSubmit,
 }) => {
+  const { user } = useUser();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [orderScreenshot, setOrderScreenshot] = useState<File | null>(null);
+  const [paypalEmail, setPaypalEmail] = useState("");
 
   // Reset state when modal opens
   useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+      
+      try {
+        // Get user data from backend
+        const response = await fetch(`${API_BASE_URL}/users/${user.id}`, {
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setPaypalEmail(userData.paypalEmail || '');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
     if (isOpen) {
       setSelectedProduct(null);
       setOrderScreenshot(null);
+      fetchUserData();
     }
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -38,8 +60,12 @@ const RewardRequestModal: React.FC<RewardRequestModalProps> = ({
       alert("Please upload an order screenshot.");
       return;
     }
+    if (!paypalEmail) {
+      alert("Please enter the paypal email address to receive refund.");
+      return;
+    }
 
-    onSubmit(selectedProduct.id, orderScreenshot);
+    onSubmit(selectedProduct.id, orderScreenshot, paypalEmail);
     onClose();
   };
 
@@ -75,6 +101,18 @@ const RewardRequestModal: React.FC<RewardRequestModalProps> = ({
           accept="image/*"
           onChange={(e) => setOrderScreenshot(e.target.files?.[0] || null)}
         />
+
+        <div className="form-group">
+          <label htmlFor="paypalEmail">PayPal Email</label>
+          <input
+            type="email"
+            id="paypalEmail"
+            value={paypalEmail}
+            onChange={(e) => setPaypalEmail(e.target.value)}
+            required
+            placeholder="Enter your PayPal email"
+          />
+        </div>
 
         <div className="modal-actions">
           <button onClick={onClose} className="cancel-button">Cancel</button>

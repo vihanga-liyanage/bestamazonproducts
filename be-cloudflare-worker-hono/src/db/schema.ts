@@ -4,6 +4,7 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  paypalEmail: text("paypal_email"),
   createdAt: integer("created_at").notNull(),
 });
 
@@ -29,6 +30,7 @@ export const rewardRequests = sqliteTable("reward_requests", {
   reviewLink: text("review_link"),
   proofOfPayment: text("proof_of_payment"),
   comments: text("comments"),
+  paypalEmail: text("paypal_email").notNull(),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 });
