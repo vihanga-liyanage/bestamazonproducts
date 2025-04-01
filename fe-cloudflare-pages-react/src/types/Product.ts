@@ -4,6 +4,7 @@ export interface Product {
   price: number;
   image_url: string;
   affiliate_url: string;
+  description?: string;
   customerReviews?: number;
   bestSellersRank?: number;
 }

@@ -12,6 +12,12 @@ export const sortProducts = (products: Product[], sortBy: string) => {
   });
 };
 
-export const filterProducts = (products: Product[], priceRange: [number, number]) => {
-  return products.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1]);
+export const filterProducts = (products: Product[], priceRange: [number, number], searchQuery: string) => {
+  const query = searchQuery.toLowerCase();
+  return products.filter((product) => 
+    product.price >= priceRange[0] && 
+    product.price <= priceRange[1] &&
+    (product.title.toLowerCase().includes(query) ||
+    product.description?.toLowerCase().includes(query))
+  );
 };
