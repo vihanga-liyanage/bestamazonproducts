@@ -152,23 +152,33 @@
   font-weight: bold;
 }
 
+.filter-section button {
+  padding: 0.5rem 1rem;
+  background-color: #ff9900;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
 .filter-section {
   margin-bottom: 25px;
 }
 
-.sort-section {
+.filter-section {
   margin-bottom: 25px;
-  background-color: #f8f9fa;
   border-radius: 5px;
 }
 
-.sort-section h4 {
+.filter-section h4 {
   margin-bottom: 10px;
   font-size: 16px;
   font-weight: bold;
 }
 
-.sort-section select {
+.filter-section select {
   width: 100%;
   padding: 8px;
   font-size: 14px;
@@ -179,7 +189,19 @@
   font-family: inherit;
 }
 
-.sort-section select:focus {
+.filter-section input {
+  width: 93%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 10px;
+}
+
+.filter-section select:focus {
   outline: none;
   border-color: #007bff;
 }

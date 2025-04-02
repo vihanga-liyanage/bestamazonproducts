@@ -26,11 +26,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside className="sidebar">
-      <div className="search-section">
-        <div className="search-header">
-          <h2 className="search-title">Product Search</h2>
-        </div>
-        <div className="search-input-group">
+      <div className="filters-section">
+
+        <h3 className="filters-title">Product Search</h3>
+        <div className="filter-section">
           <input
             type="text"
             className="search-input"
@@ -45,11 +44,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             Search
           </button>
         </div>
-      </div>
 
-      <div className="filters-section">
         <h3 className="filters-title">Sort Options</h3>
-        <div className="sort-section">
+        <div className="filter-section">
           <select onChange={(e) => setSortBy(e.target.value)}>
             <option value="priceHighLow">Price: High to Low</option>
             <option value="priceLowHigh">Price: Low to High</option>
